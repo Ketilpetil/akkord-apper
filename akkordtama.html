@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Akkordtama – Tamagotchi-musikkøving</title>
+<style>
+  :root{
+    --bg:#f4f5fb; --card:#ffffff; --ink:#1f2937; --muted:#6b7280;
+    --accent:#6366f1; --accent2:#8b5cf6; --good:#16a34a; --good-bg:#ecfdf3;
+    --bad:#dc2626; --line:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+  header{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;padding:20px 24px}
+  header h1{margin:0;font-size:1.5rem}
+  header p{margin:6px 0 0;opacity:.92;font-size:.95rem}
+  main{max-width:1060px;margin:0 auto;padding:18px 16px 60px}
+  #errbanner{display:none;background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-weight:600}
+
+  .topbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+  .topbar label{font-size:.9rem;color:var(--muted);font-weight:600}
+  select,input[type=text]{font:inherit;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+
+  .game{display:grid;grid-template-columns:300px 1fr;gap:16px;align-items:start}
+  @media(max-width:840px){.game{grid-template-columns:1fr}}
+
+  /* --- Tamagotchi-panel --- */
+  .pet-panel{background:var(--card);border-radius:18px;padding:16px;box-shadow:0 6px 24px rgba(30,27,75,.08)}
+  #petWrap{position:relative}
+  #petWrap svg{width:190px;height:auto;display:block;margin:0 auto}
+  #petWrap.feed svg{animation:bounce .55s ease}
+  @keyframes bounce{0%{transform:translateY(0) scale(1)}30%{transform:translateY(-16px) scale(1.05)}60%{transform:translateY(0) scale(.96)}100%{transform:translateY(0) scale(1)}}
+  #nom{position:absolute;top:6px;left:50%;transform:translateX(-50%);font-weight:800;color:var(--good);opacity:0;pointer-events:none;font-size:1.2rem}
+  #nom.show{animation:nompop 1s ease}
+  @keyframes nompop{0%{opacity:0;transform:translate(-50%,10px) scale(.6)}20%{opacity:1;transform:translate(-50%,0) scale(1.15)}70%{opacity:1}100%{opacity:0;transform:translate(-50%,-14px) scale(1)}}
+  #petName{width:100%;text-align:center;font-weight:800;font-size:1.05rem;border:none;background:transparent;color:var(--accent2);margin-bottom:6px}
+  #petName:focus{outline:2px solid var(--line);border-radius:8px;background:#fff}
+  .stat{display:flex;align-items:center;gap:8px;margin:7px 0;font-size:.88rem}
+  .stat .bar{flex:1;height:14px;background:#e5e7eb;border-radius:999px;overflow:hidden}
+  .fill{height:100%;transition:width .4s, background .4s}
+  #hungerFill{width:80%;background:linear-gradient(90deg,#4ade80,#16a34a)}
+  #hungerFill.low{background:linear-gradient(90deg,#f87171,#dc2626)}
+  #xpFill{width:0%;background:linear-gradient(90deg,#a78bfa,#7c3aed)}
+  .stat.small{font-size:.82rem;color:var(--muted)}
+  .pet-panel h3{margin:12px 0 6px;font-size:.95rem}
+  #collection{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .item{border:1px solid var(--line);border-radius:10px;background:#fff;padding:7px 4px;text-align:center;cursor:pointer;font-size:.72rem;color:var(--ink)}
+  .item .emo{font-size:1.45rem;display:block}
+  .item.locked{opacity:.45;cursor:not-allowed}
+  .item.equipped{box-shadow:0 0 0 3px var(--accent)}
+  .hint{font-size:.78rem;color:var(--muted);line-height:1.45;margin-top:10px}
+
+  /* --- Akkord-kort (som v1) --- */
+  .card{background:var(--card);border-radius:18px;padding:22px;box-shadow:0 6px 24px rgba(30,27,75,.08);border:2px solid transparent;transition:background .35s,border-color .35s}
+  .card.correct{background:var(--good-bg);border-color:var(--good)}
+  .card.wrong{animation:shake .4s}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+  .chord-row{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+  .chord-name{font-size:2.6rem;font-weight:800;color:var(--accent);line-height:1;transition:color .35s}
+  .card.correct .chord-name{color:var(--good)}
+  .chord-hint{color:var(--muted)}
+  .chord-answer{font-weight:700;color:var(--good);min-height:1.4em}
+  #staffWrap{max-width:420px;margin:10px auto 4px;background:#fffdf5;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  #staffWrap svg{display:block;width:100%;height:auto}
+  #chips{display:flex;flex-wrap:wrap;gap:8px;min-height:38px;margin:8px 0 4px}
+  .chip{display:inline-flex;align-items:center;gap:6px;background:#eef2ff;color:#3730a3;border-radius:999px;padding:5px 6px 5px 12px;font-weight:700;border:1px solid #c7d2fe}
+  .card.correct .chip{background:#dcfce7;color:#166534;border-color:#86efac}
+  .chip .play{border:none;background:transparent;cursor:pointer;font-size:.85rem;padding:2px 4px}
+  .chip .rm{border:none;background:rgba(0,0,0,.08);border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:.8rem;line-height:1;padding:0}
+  #feedback{min-height:1.6em;font-weight:600;margin:6px 0 10px}
+  #feedback.good{color:var(--good)} #feedback.bad{color:var(--bad)} #feedback.warn{color:#b45309}
+  .actions{display:flex;flex-wrap:wrap;gap:10px}
+  button{cursor:pointer;font:inherit;font-weight:700;border-radius:12px;border:none;padding:11px 18px;transition:transform .08s,filter .15s}
+  button:hover{filter:brightness(1.06)} button:active{transform:scale(.97)}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-good{background:var(--good);color:#fff}
+  .btn-ghost{background:#fff;border:1px solid var(--line);color:var(--ink)}
+  .btn-next{background:var(--good);color:#fff;display:none}
+  .card.correct .btn-next{display:inline-block}
+
+  .pad{margin-top:16px;background:var(--card);border-radius:18px;padding:18px;box-shadow:0 6px 24px rgba(30,27,75,.08)}
+  .pad h2{margin:0 0 10px;font-size:1.05rem}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-right:10px;vertical-align:middle}
+  .seg button{border-radius:0;padding:9px 14px;background:#fff;border:none;border-right:1px solid var(--line)}
+  .seg button:last-child{border-right:none}
+  .seg button.active{background:var(--accent);color:#fff}
+  .notes{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+  .notes button{width:52px;height:52px;font-size:1.25rem;font-weight:800;border-radius:12px;background:#1f2937;color:#fff}
+  .notes button:hover{background:var(--accent)}
+  .textrow{display:flex;gap:8px;flex-wrap:wrap}
+  .textrow input{flex:1;min-width:180px}
+  .help{font-size:.85rem;color:var(--muted);margin-top:10px;line-height:1.5}
+  kbd{background:#e5e7eb;border-radius:5px;padding:1px 6px;font-family:inherit;font-size:.8rem}
+
+  .progress{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;align-items:center}
+  .progress .dot{padding:6px 12px;border-radius:999px;background:#fff;border:1px solid var(--line);font-weight:700;font-size:.9rem;color:var(--muted)}
+  .progress .dot.current{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .progress .dot.done{background:var(--good-bg);color:var(--good);border-color:var(--good)}
+
+  #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#111827;color:#fff;padding:12px 20px;border-radius:12px;font-weight:700;opacity:0;transition:.3s;z-index:60;pointer-events:none;max-width:90vw;text-align:center}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  #deathOverlay{position:fixed;inset:0;background:rgba(17,24,39,.72);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+  #deathOverlay.show{display:flex}
+  #deathOverlay .panel{background:#fff;border-radius:18px;padding:28px;max-width:430px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+  #deathOverlay h2{margin:0 0 8px}
+  #deathOverlay .stats{margin:12px 0 18px;color:var(--muted);line-height:1.7}
+  #deathOverlay .big{font-size:3.4rem}
+</style>
+</head>
+<body>
+<header>
+  <h1>🎮 Akkordtama</h1>
+  <p>Tamagotchien din må mates med <b>riktige akkordsvar</b> for å overleve! Riktige svar gir mat, XP og gjenstander. 🎁</p>
+</header>
+<main>
+  <div id="errbanner"></div>
+  <div class="topbar">
+    <label for="prog">Akkordrekke:</label>
+    <select id="prog"></select>
+    <button id="playAll" class="btn-ghost" type="button">▶ Spill hele rekken</button>
+    <button id="resetAll" class="btn-ghost" type="button" title="Slett lagret spill">🗑 Nullstill alt</button>
+  </div>
+
+  <div class="game">
+    <aside class="pet-panel">
+      <div id="petWrap"><div id="petSvg"></div><div id="nom">🍔 NOM!</div></div>
+      <input id="petName" type="text" maxlength="14" title="Klikk for å gi tamagotchien et navn">
+      <div class="stat"><span>🍖</span><div class="bar"><div class="fill" id="hungerFill"></div></div><span id="hungerVal"></span></div>
+      <div class="stat"><span>⭐</span><div class="bar"><div class="fill" id="xpFill"></div></div><span id="xpVal"></span></div>
+      <div class="stat small">Level <b id="levelVal"></b> · 🔥 streak <b id="streakVal"></b> (beste <b id="bestVal"></b>) · ✅ <b id="okVal"></b> · ❌ <b id="badVal"></b></div>
+      <h3>🎒 Samling <span style="font-weight:400;color:var(--muted);font-size:.75rem">(klikk for å ta på)</span></h3>
+      <div id="collection"></div>
+      <p class="hint">Tamagotchien blir sulten med tiden (og av feilsvar!). Riktig svar = 🍔 mat + XP. Ved streak 3/5/8 og level 3/5/8 vinner du gjenstander. Sulter den ihjel, dør den… 💀</p>
+    </aside>
+
+    <section class="card" id="card">
+      <div class="chord-row">
+        <div class="chord-name" id="chordName">C-dur</div>
+        <div class="chord-hint" id="chordHint"></div>
+      </div>
+      <div class="chord-answer" id="chordAnswer"></div>
+      <div id="staffWrap" role="img" aria-label="Notelinje"></div>
+      <div id="chips"></div>
+      <div id="feedback"></div>
+      <div class="actions">
+        <button id="playBtn" class="btn-primary" type="button">🔊 Spill det jeg har skrevet</button>
+        <button id="arpBtn" class="btn-ghost" type="button">🎶 Arpeggio</button>
+        <button id="checkBtn" class="btn-good" type="button">✔ Sjekk svar (mat tamagotchien!)</button>
+        <button id="answerBtn" class="btn-ghost" type="button">👂 Hør fasit</button>
+        <button id="clearBtn" class="btn-ghost" type="button">🗑 Tøm</button>
+        <button id="nextBtn" class="btn-next" type="button">Neste akkord →</button>
+      </div>
+    </section>
+  </div>
+
+  <section class="pad">
+    <h2>Skriv inn toner</h2>
+    <div>
+      <span class="seg" id="octSeg"><button type="button" data-oct="3">3</button><button type="button" data-oct="4" class="active">4</button><button type="button" data-oct="5">5</button></span>
+      <span class="seg" id="accSeg"><button type="button" data-acc="0" class="active">♮</button><button type="button" data-acc="1">♯</button><button type="button" data-acc="-1">♭</button></span>
+    </div>
+    <div class="notes" id="notePad"></div>
+    <div class="textrow">
+      <input type="text" id="noteInput" placeholder="eller skriv f.eks. «c e g» og trykk Enter">
+      <button id="addBtn" class="btn-primary" type="button">Legg til</button>
+    </div>
+    <p class="help">Klikk på tonene, skriv i feltet, eller bruk tastaturet (<kbd>c</kbd> <kbd>d</kbd> <kbd>e</kbd> <kbd>f</kbd> <kbd>g</kbd> <kbd>a</kbd> <kbd>h</kbd>). Norsk notasjon: <b>H</b> = B-naturlig, <b>B</b> = Bb. Fortegn: <kbd>#</kbd>/<kbd>b</kbd> etter bokstaven, f.eks. <i>f#</i>. Oktave 4 er standard.</p>
+  </section>
+
+  <div class="progress" id="progress"></div>
+</main>
+
+<div id="toast"></div>
+<div id="deathOverlay">
+  <div class="panel">
+    <div class="big">💀</div>
+    <h2 id="deathTitle">Tamagotchien døde…</h2>
+    <p id="deathText">Den sultet ihjel fordi den ikke fikk nok riktige akkordsvar.</p>
+    <div class="stats" id="deathStats"></div>
+    <button id="restartBtn" class="btn-good" type="button">🐣 Start en ny tamagotchi</button>
+    <p class="hint">Samlingen din (🎒) beholdes.</p>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* ================= Musikkdata ================= */
+const SEMI = {C:0, D:2, E:4, F:5, G:7, A:9, H:11};
+const LETTERS = ['C','D','E','F','G','A','H'];
+const CHORDS = {
+  'C':{name:'C-dur',tones:['C','E','G']}, 'G':{name:'G-dur',tones:['G','H','D']},
+  'F':{name:'F-dur',tones:['F','A','C']}, 'D':{name:'D-dur',tones:['D','F#','A']},
+  'A':{name:'A-dur',tones:['A','C#','E']}, 'E':{name:'E-dur',tones:['E','G#','H']},
+  'B':{name:'B-dur',tones:['B','D','F']},
+  'Am':{name:'A-moll',tones:['A','C','E']}, 'Dm':{name:'D-moll',tones:['D','F','A']},
+  'Em':{name:'E-moll',tones:['E','G','H']}, 'Bm':{name:'H-moll',tones:['H','D','F#']},
+  'Gm':{name:'G-moll',tones:['G','B','D']},
+  'C7':{name:'C7',tones:['C','E','G','B']}, 'G7':{name:'G7',tones:['G','H','D','F']},
+  'D7':{name:'D7',tones:['D','F#','A','C']}, 'Am7':{name:'Am7',tones:['A','C','E','G']},
+  'Dm7':{name:'Dm7',tones:['D','F','A','C']}, 'Em7':{name:'Em7',tones:['E','G','H','D']}
+};
+const PROGRESSIONS = {
+  'C-dur: I–V–vi–IV (C–G–Am–F)':        ['C','G','Am','F'],
+  'C-dur: I–IV–V–I (C–F–G–C)':          ['C','F','G','C'],
+  'C-dur: ii–V–I (Dm–G–C)':             ['Dm','G','C'],
+  'G-dur: I–V–vi–IV (G–D–Em–C)':        ['G','D','Em','C'],
+  'F-dur: I–V–vi–IV (F–C–Dm–B)':        ['F','C','Dm','B'],
+  'A-moll: i–VII–VI–VII (Am–G–F–G)':     ['Am','G','F','G'],
+  'D-moll: i–VII–VI (Dm–C–B)':          ['Dm','C','B'],
+  'Med 7-akkorder (C–G7–Am7–F)':        ['C','G7','Am7','F'],
+  'Blues i C (12 takter)':              ['C','C','F','C','C','G','F','C','C','G','F','C']
+};
+const RANDOM_KEY = '🎲 Tilfeldig rekke';
+
+/* ================= Gjenstander ================= */
+const ITEMS = {
+  bowtie:  {emo:'🎀', name:'Sløyfe',     slot:'hals',   need:{streak:3}},
+  glasses: {emo:'🕶️', name:'Solbriller', slot:'ansikt', need:{streak:5}},
+  hat:     {emo:'🎩', name:'Hatt',       slot:'hode',   need:{streak:8}},
+  flower:  {emo:'🌸', name:'Blomst',     slot:'hode',   need:{level:3}},
+  scarf:   {emo:'🧣', name:'Skjerf',     slot:'hals',   need:{level:5}},
+  crown:   {emo:'👑', name:'Kron',       slot:'hode',   need:{level:8}}
+};
+
+/* ================= Noter ================= */
+function parseNote(tok, defOct){
+  if(!tok) return null;
+  const m = /^([a-hA-H])(#{1,2}|b{1,2}|♯{1,2}|♭{1,2})?(\d)?$/.exec(String(tok).trim());
+  if(!m) return null;
+  let letter = m[1].toUpperCase();
+  let acc = 0;
+  if(m[2]){
+    const sharps = m[2].includes('#') || m[2].includes('♯');
+    const n = (m[2].length > 1 && m[2][1] === m[2][0]) ? 2 : 1;
+    acc = sharps ? n : -n;
+  }
+  if(letter === 'B'){ acc = (m[2] && (m[2].includes('#') || m[2].includes('♯'))) ? 1 : -1; letter = 'H'; }
+  const oct = (m[3] !== undefined) ? parseInt(m[3],10) : defOct;
+  const midi = 12*(oct+1) + SEMI[letter] + acc;
+  let label = letter + (acc > 0 ? '#'.repeat(acc) : acc < 0 ? 'b'.repeat(-acc) : '') + oct;
+  if(letter === 'H' && acc === -1) label = 'B' + oct;
+  return {letter, acc, oct, midi, label};
+}
+function pcOf(tok){ const n = parseNote(tok,4); return n ? ((n.midi%12)+12)%12 : null; }
+function chordIsCorrect(key, notes){
+  const want = CHORDS[key].tones.map(t=>pcOf(t)).sort((a,b)=>a-b).join(',');
+  const got = [...new Set(notes.map(n=>((n.midi%12)+12)%12))].sort((a,b)=>a-b).join(',');
+  return want===got;
+}
+
+/* ================= Lyd ================= */
+let audioCtx=null, master=null;
+function ac(){
+  if(!audioCtx){
+    const AC = window.AudioContext || window.webkitAudioContext;
+    audioCtx = new AC();
+    master = audioCtx.createDynamicsCompressor();
+    master.threshold.value=-18; master.ratio.value=6;
+    master.connect(audioCtx.destination);
+  }
+  if(audioCtx.state==='suspended') audioCtx.resume();
+  return audioCtx;
+}
+function freq(midi){ return 440*Math.pow(2,(midi-69)/12); }
+function playTones(midis, dur, arp){
+  dur = dur||1.3; arp = !!arp;
+  if(!midis.length) return;
+  try{
+    const c = ac(); const t0 = c.currentTime+0.06;
+    midis.forEach(function(m,i){
+      const t = arp ? t0+i*0.13 : t0;
+      const g = c.createGain();
+      g.gain.setValueAtTime(0.0001,t);
+      g.gain.exponentialRampToValueAtTime(0.22,t+0.03);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      const o1=c.createOscillator(); o1.type='triangle'; o1.frequency.value=freq(m);
+      const o2=c.createOscillator(); o2.type='sine'; o2.frequency.value=freq(m)*2;
+      const g2=c.createGain(); g2.gain.value=0.22;
+      o1.connect(g); o2.connect(g2); g2.connect(g); g.connect(master);
+      o1.start(t); o1.stop(t+dur+0.1); o2.start(t); o2.stop(t+dur+0.1);
+    });
+  }catch(e){}
+}
+function playChordKey(key,dur,arp){ playTones(CHORDS[key].tones.map(t=>parseNote(t,4).midi),dur,arp); }
+function jingleCorrect(key){ playChordKey(key,1.1,false); setTimeout(function(){ playTones([72,76,79,84],1.0,true); },380); }
+function jingleWrong(){ playTones([64],.22,false); setTimeout(function(){ playTones([57],.5,false); },180); }
+function jingleLevel(){ playTones([60,64,67,72,76,79,84],1.4,true); }
+function jingleItem(){ playTones([67,72,79],.9,true); }
+function jingleDeath(){ playTones([55],.5,false); setTimeout(function(){ playTones([53],.6,false); },320); setTimeout(function(){ playTones([48],1.5,false); },750); }
+
+/* ================= Spilltilstand ================= */
+const SAVE_KEY = 'akkordtama_v2';
+const DEF = {
+  name:'Bob', hunger:80, xp:0, level:1, streak:0, bestStreak:0,
+  items:[], equipped:{}, alive:true, totalCorrect:0, totalWrong:0,
+  lastSeen:Date.now(), prog:Object.keys(PROGRESSIONS)[0], idx:0,
+  entered:[], attempts:0, solved:false, oct:4, accMode:0, randomList:null, finished:false
+};
+const game = Object.assign({}, DEF);
+function xpNeeded(level){ return 30 + (level-1)*20; }
+
+function activeList(){
+  if(game.prog===RANDOM_KEY){
+    if(!game.randomList) game.randomList = Object.keys(CHORDS).sort(()=>Math.random()-0.5).slice(0,8);
+    return game.randomList;
+  }
+  return PROGRESSIONS[game.prog];
+}
+function currentKey(){ return activeList()[game.idx]; }
+
+function save(){
+  try{
+    const {entered, attempts, solved, randomList, finished, accMode, ...p} = game;
+    p.lastSeen = Date.now();
+    localStorage.setItem(SAVE_KEY, JSON.stringify(p));
+  }catch(e){}
+}
+function load(){
+  try{
+    const raw = localStorage.getItem(SAVE_KEY);
+    if(!raw) return;
+    const d = JSON.parse(raw);
+    Object.assign(game, DEF, d);
+    // tamagotchien blir sulten mens du er borte 🙂
+    if(game.alive && d.lastSeen){
+      const awaySec = (Date.now()-d.lastSeen)/1000;
+      game.hunger = Math.max(0, game.hunger - awaySec*0.25);
+      if(game.hunger<=0){ game.alive=false; }
+    }
+  }catch(e){}
+}
+
+/* ================= DOM ================= */
+let el = {};
+function $(id){ return document.getElementById(id); }
+
+function init(){
+  el = {
+    prog:$('prog'), playAll:$('playAll'), resetAll:$('resetAll'),
+    petWrap:$('petWrap'), petSvg:$('petSvg'), nom:$('nom'), petName:$('petName'),
+    hungerFill:$('hungerFill'), hungerVal:$('hungerVal'), xpFill:$('xpFill'), xpVal:$('xpVal'),
+    levelVal:$('levelVal'), streakVal:$('streakVal'), bestVal:$('bestVal'), okVal:$('okVal'), badVal:$('badVal'),
+    collection:$('collection'), toast:$('toast'),
+    card:$('card'), chordName:$('chordName'), chordHint:$('chordHint'), chordAnswer:$('chordAnswer'),
+    staffWrap:$('staffWrap'), chips:$('chips'), feedback:$('feedback'),
+    playBtn:$('playBtn'), arpBtn:$('arpBtn'), checkBtn:$('checkBtn'), answerBtn:$('answerBtn'),
+    clearBtn:$('clearBtn'), nextBtn:$('nextBtn'),
+    octSeg:$('octSeg'), accSeg:$('accSeg'), notePad:$('notePad'), noteInput:$('noteInput'), addBtn:$('addBtn'),
+    progress:$('progress'), deathOverlay:$('deathOverlay'), deathStats:$('deathStats'), restartBtn:$('restartBtn')
+  };
+
+  Object.keys(PROGRESSIONS).forEach(function(k){ const o=document.createElement('option'); o.value=k; o.textContent=k; el.prog.appendChild(o); });
+  const ro=document.createElement('option'); ro.value=RANDOM_KEY; ro.textContent=RANDOM_KEY; el.prog.appendChild(ro);
+  el.prog.value = game.prog in PROGRESSIONS || game.prog===RANDOM_KEY ? game.prog : PROGRESSIONS && Object.keys(PROGRESSIONS)[0];
+
+  LETTERS.forEach(function(L){
+    const b=document.createElement('button'); b.type='button'; b.textContent=L;
+    b.addEventListener('click',function(){ addToken(L+(game.accMode===1?'#':game.accMode===-1?'b':'')+game.oct, true); });
+    el.notePad.appendChild(b);
+  });
+  el.octSeg.addEventListener('click',function(e){
+    const b=e.target.closest('button'); if(!b) return;
+    game.oct=parseInt(b.dataset.oct,10);
+    [...el.octSeg.querySelectorAll('button')].forEach(x=>x.classList.toggle('active',x===b));
+  });
+  el.accSeg.addEventListener('click',function(e){
+    const b=e.target.closest('button'); if(!b) return;
+    game.accMode=parseInt(b.dataset.acc,10);
+    [...el.accSeg.querySelectorAll('button')].forEach(x=>x.classList.toggle('active',x===b));
+  });
+
+  el.prog.addEventListener('change',function(){ game.prog=el.prog.value; game.randomList=null; game.idx=0; save(); loadChord(); });
+  el.playAll.addEventListener('click',playWholeProgression);
+  el.playBtn.addEventListener('click',function(){ playEntered(false); });
+  el.arpBtn.addEventListener('click',function(){ playEntered(true); });
+  el.checkBtn.addEventListener('click',check);
+  el.answerBtn.addEventListener('click',function(){ if(game.alive) playChordKey(currentKey(),1.6,false); });
+  el.clearBtn.addEventListener('click',function(){ game.entered=[]; render(); });
+  el.nextBtn.addEventListener('click',next);
+  el.addBtn.addEventListener('click',addFromText);
+  el.noteInput.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); addFromText(); } });
+  el.petName.addEventListener('change',function(){ game.name=el.petName.value.trim()||'Bob'; save(); renderPet(); });
+  el.resetAll.addEventListener('click',function(){ try{ localStorage.removeItem(SAVE_KEY); }catch(e){} location.reload(); });
+  el.restartBtn.addEventListener('click',restart);
+
+  document.addEventListener('keydown',function(e){
+    if(e.target===el.noteInput || e.target===el.petName || e.metaKey||e.ctrlKey||e.altKey) return;
+    const k=e.key.toLowerCase();
+    if(LETTERS.map(x=>x.toLowerCase()).includes(k)) addToken(k.toUpperCase()+game.oct,true);
+  });
+  document.addEventListener('pointerdown',function unlock(){
+    try{ ac(); }catch(e){}
+    document.removeEventListener('pointerdown',unlock);
+  });
+
+  loadChord();
+  renderAll();
+  if(!game.alive) showDeath();
+  let ticks=0;
+  setInterval(function(){
+    if(!game.alive) return;
+    game.hunger = Math.max(0, game.hunger - 0.25);   // -1 per 4 sek
+    if(game.hunger<=0){ die(); return; }
+    renderPet();
+    if(++ticks % 20 === 0) save();
+  },1000);
+}
+
+/* ================= Tamagotchi ================= */
+const ACC_SVG = {
+  crown: '<polygon points="72,58 80,32 93,50 100,26 107,50 120,32 128,58" fill="#fbbf24" stroke="#d97706" stroke-width="2"/><circle cx="80" cy="31" r="3.5" fill="#f59e0b"/><circle cx="100" cy="25" r="3.5" fill="#f59e0b"/><circle cx="120" cy="31" r="3.5" fill="#f59e0b"/>',
+  hat: '<rect x="76" y="18" width="48" height="40" rx="8" fill="#111827"/><rect x="76" y="44" width="48" height="9" fill="#dc2626"/><ellipse cx="100" cy="60" rx="40" ry="9" fill="#111827"/>',
+  flower: '<g fill="#f472b6"><circle cx="138" cy="50" r="7"/><circle cx="149" cy="58" r="7"/><circle cx="145" cy="71" r="7"/><circle cx="131" cy="71" r="7"/><circle cx="127" cy="58" r="7"/></g><circle cx="138" cy="61" r="5.5" fill="#fbbf24"/>',
+  glasses: '<g stroke="#111827" stroke-width="3" fill="rgba(125,211,252,.45)"><circle cx="78" cy="95" r="16"/><circle cx="122" cy="95" r="16"/><line x1="94" y1="95" x2="106" y2="95"/><line x1="62" y1="92" x2="34" y2="87"/><line x1="138" y1="92" x2="166" y2="87"/></g>',
+  bowtie: '<polygon points="100,168 78,158 78,178" fill="#dc2626"/><polygon points="100,168 122,158 122,178" fill="#dc2626"/><circle cx="100" cy="168" r="6" fill="#b91c1c"/>',
+  scarf: '<rect x="58" y="150" width="84" height="20" rx="10" fill="#0ea5e9"/><rect x="112" y="166" width="20" height="30" rx="8" fill="#0284c7"/>'
+};
+function petSVG(){
+  const h = game.hunger, dead = !game.alive;
+  let body = '#8b5cf6';
+  if(dead) body = '#9ca3af';
+  else if(h<10) body = '#c4b5fd';
+  else if(h<30) body = '#a78bfa';
+  let eyes, mouth, extra = '';
+  if(dead){
+    eyes = '<g stroke="#374151" stroke-width="5" stroke-linecap="round">'
+      + '<line x1="69" y1="86" x2="87" y2="104"/><line x1="87" y1="86" x2="69" y2="104"/>'
+      + '<line x1="113" y1="86" x2="131" y2="104"/><line x1="131" y1="86" x2="113" y2="104"/></g>';
+    mouth = '<line x1="85" y1="141" x2="115" y2="141" stroke="#374151" stroke-width="5" stroke-linecap="round"/>';
+  } else {
+    eyes = '<circle cx="78" cy="95" r="12" fill="#fff"/><circle cx="122" cy="95" r="12" fill="#fff"/>'
+      + '<circle cx="78" cy="97" r="5.5" fill="#111827"/><circle cx="122" cy="97" r="5.5" fill="#111827"/>'
+      + '<circle cx="80" cy="94" r="1.8" fill="#fff"/><circle cx="124" cy="94" r="1.8" fill="#fff"/>';
+    if(h>=60)      mouth = '<path d="M78 130 Q100 158 122 130" stroke="#374151" stroke-width="5" fill="none" stroke-linecap="round"/>';
+    else if(h>=30) mouth = '<path d="M84 134 Q100 148 116 134" stroke="#374151" stroke-width="5" fill="none" stroke-linecap="round"/>';
+    else if(h>=10) mouth = '<path d="M80 144 Q100 126 120 144" stroke="#374151" stroke-width="5" fill="none" stroke-linecap="round"/>';
+    else           mouth = '<ellipse cx="100" cy="141" rx="9" ry="7" fill="#374151"/>';
+    if(h<30 && h>=10) extra += '<g stroke="#374151" stroke-width="4" stroke-linecap="round"><line x1="66" y1="76" x2="88" y2="83"/><line x1="134" y1="76" x2="112" y2="83"/></g>';
+    if(h<15) extra += '<path d="M148 62 q7 11 0 16 q-7 -5 0 -16" fill="#7dd3fc"/>';
+  }
+  const blush = (!dead && h>=30) ? '<circle cx="60" cy="118" r="8" fill="rgba(244,114,182,.5)"/><circle cx="140" cy="118" r="8" fill="rgba(244,114,182,.5)"/>' : '';
+  let acc = '';
+  Object.values(game.equipped).forEach(function(id){ if(ACC_SVG[id]) acc += '<g>' + ACC_SVG[id] + '</g>'; });
+  return '<svg viewBox="0 0 200 210" xmlns="http://www.w3.org/2000/svg">'
+    + '<ellipse cx="100" cy="196" rx="55" ry="9" fill="rgba(0,0,0,.12)"/>'
+    + '<ellipse cx="100" cy="118" rx="68" ry="62" fill="' + body + '"/>'
+    + '<ellipse cx="100" cy="142" rx="38" ry="26" fill="rgba(255,255,255,.22)"/>'
+    + blush + eyes + extra + mouth + acc
+    + '<text x="100" y="205" text-anchor="middle" font-size="12" fill="#6b7280" font-family="sans-serif"></text>'
+    + '</svg>';
+}
+function renderPet(){
+  el.petSvg.innerHTML = petSVG();
+  el.petName.value = game.name;
+  const h = Math.round(game.hunger);
+  el.hungerFill.style.width = h + '%';
+  el.hungerFill.classList.toggle('low', h < 30);
+  el.hungerVal.textContent = h + '%';
+  const need = xpNeeded(game.level);
+  el.xpFill.style.width = Math.min(100, Math.round(game.xp/need*100)) + '%';
+  el.xpVal.textContent = game.xp + '/' + need + ' XP';
+  el.levelVal.textContent = game.level;
+  el.streakVal.textContent = game.streak;
+  el.bestVal.textContent = game.bestStreak;
+  el.okVal.textContent = game.totalCorrect;
+  el.badVal.textContent = game.totalWrong;
+  renderCollection();
+}
+function renderCollection(){
+  el.collection.innerHTML = '';
+  Object.entries(ITEMS).forEach(function(pair){
+    const id = pair[0], it = pair[1];
+    const owned = game.items.includes(id);
+    const equipped = game.equipped[it.slot] === id;
+    const d = document.createElement('button');
+    d.type = 'button';
+    d.className = 'item' + (owned ? '' : ' locked') + (equipped ? ' equipped' : '');
+    d.innerHTML = '<span class="emo">' + (owned ? it.emo : '🔒') + '</span>' + (owned ? it.name : 'Lås opp: ' + unlockText(it));
+    if(owned){
+      d.addEventListener('click', function(){
+        game.equipped[it.slot] = (game.equipped[it.slot] === id) ? null : id;
+        save(); renderPet(); toast(equipped ? it.name + ' tatt av' : it.emo + ' ' + it.name + ' tatt på!');
+      });
+    }
+    el.collection.appendChild(d);
+  });
+}
+function unlockText(it){
+  if(it.need.streak) return 'streak ' + it.need.streak;
+  if(it.need.level) return 'level ' + it.need.level;
+  return '?';
+}
+let toastTimer = null;
+function toast(msg){
+  el.toast.textContent = msg;
+  el.toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ el.toast.classList.remove('show'); }, 2800);
+}
+function feedAnim(){
+  el.petWrap.classList.remove('feed'); void el.petWrap.offsetWidth; el.petWrap.classList.add('feed');
+  el.nom.classList.remove('show'); void el.nom.offsetWidth; el.nom.classList.add('show');
+}
+function showDeath(){
+  el.deathStats.innerHTML = 'Level <b>' + game.level + '</b> · beste streak <b>🔥 ' + game.bestStreak + '</b><br>'
+    + '✅ riktige: <b>' + game.totalCorrect + '</b> · ❌ feil: <b>' + game.totalWrong + '</b><br>'
+    + '🎒 gjenstander: <b>' + game.items.length + ' / ' + Object.keys(ITEMS).length + '</b>';
+  el.deathOverlay.classList.add('show');
+}
+function die(){
+  game.alive = false; game.hunger = 0;
+  jingleDeath(); save(); renderAll(); showDeath();
+}
+function restart(){
+  const keepItems = game.items.slice(), keepEquipped = Object.assign({}, game.equipped);
+  Object.assign(game, DEF, {
+    items: keepItems, equipped: keepEquipped,
+    prog: game.prog, name: game.name,
+    entered: [], attempts: 0, solved: false, randomList: null, finished: false, idx: 0
+  });
+  el.deathOverlay.classList.remove('show');
+  save(); loadChord(); renderAll();
+  toast('🐣 Ny tamagotchi! Gi den riktige akkorder så den lever!');
+}
+
+/* ================= Spill-logikk ================= */
+function onCorrect(){
+  const key = currentKey();
+  game.totalCorrect++;
+  game.streak++;
+  if(game.streak > game.bestStreak) game.bestStreak = game.streak;
+  game.hunger = Math.min(100, game.hunger + 18);
+  const firstTry = game.attempts === 1;
+  game.xp += 10 + (firstTry ? 5 : 0) + Math.min(game.streak, 5) * 2;
+  let leveled = false;
+  while(game.xp >= xpNeeded(game.level)){ game.xp -= xpNeeded(game.level); game.level++; leveled = true; }
+  if(leveled){ jingleLevel(); toast('🎉 Level ' + game.level + '!'); }
+  // lås opp gjenstander
+  Object.entries(ITEMS).forEach(function(pair){
+    const id = pair[0], it = pair[1];
+    if(game.items.includes(id)) return;
+    const ok = (it.need.streak && game.bestStreak >= it.need.streak) || (it.need.level && game.level >= it.need.level);
+    if(ok){
+      game.items.push(id);
+      game.equipped[it.slot] = id;
+      jingleItem();
+      toast('🎁 Du vant ' + it.emo + ' ' + it.name + '!');
+    }
+  });
+  jingleCorrect(key);
+  feedAnim();
+  save();
+}
+function onWrong(){
+  game.totalWrong++;
+  game.streak = 0;
+  game.hunger = Math.max(0, game.hunger - 8);
+  jingleWrong();
+  if(game.hunger <= 0) die();
+  save();
+}
+
+function addToken(tok, sound){
+  const n = parseNote(tok, game.oct);
+  if(!n){ setFeedback('Kunne ikke lese "' + tok + '" – prøv f.eks. c, f# eller b4', 'warn'); return false; }
+  game.entered.push({tok: tok, note: n});
+  if(sound) playTones([n.midi], 0.6, false);
+  render();
+  return true;
+}
+function addFromText(){
+  const v = el.noteInput.value.trim();
+  if(!v) return;
+  const toks = v.split(/[\s,;]+/).filter(Boolean);
+  let added = 0;
+  toks.forEach(function(t){ if(addToken(t, added === 0)) added++; });
+  el.noteInput.value = '';
+  if(added === 0) setFeedback('Ingen gyldige toner i "' + v + '" – prøv f.eks. «c e g»', 'warn');
+  render();
+}
+function playEntered(arp){
+  if(!game.entered.length){ setFeedback('Skriv inn noen toner først 🙂', 'warn'); return; }
+  playTones(game.entered.map(e=>e.note.midi), 1.4, arp);
+}
+function check(){
+  if(!game.alive){ setFeedback('Tamagotchien er død 💀 Start en ny!', 'bad'); return; }
+  if(!game.entered.length){ setFeedback('Skriv inn tonene i akkorden først 🙂', 'warn'); return; }
+  game.attempts++;
+  const key = currentKey();
+  const want = CHORDS[key].tones.map(t=>pcOf(t));
+  const gotSet = [...new Set(game.entered.map(e=>((e.note.midi%12)+12)%12))];
+  const hits = gotSet.filter(p=>want.includes(p)).length;
+  if(chordIsCorrect(key, game.entered.map(e=>e.note)) && gotSet.length === want.length){
+    game.solved = true;
+    el.card.classList.remove('wrong'); el.card.classList.add('correct');
+    el.chordAnswer.textContent = CHORDS[key].name + ' = ' + CHORDS[key].tones.join(' – ');
+    setFeedback('Riktig! 🎉 Tamagotchien får mat! 🍔', 'good');
+    onCorrect();
+    render();
+  } else {
+    el.card.classList.remove('wrong'); void el.card.offsetWidth; el.card.classList.add('wrong');
+    setFeedback('Ikke helt… ' + hits + ' av ' + want.length + ' riktige toner. Tamagotchien blir sulten! 😟', 'bad');
+    onWrong();
+    render();
+  }
+}
+function next(){
+  if(game.finished){ startOver(); return; }
+  const list = activeList();
+  if(game.idx >= list.length - 1){ finish(); return; }
+  game.idx++;
+  loadChord();
+}
+function loadChord(){
+  game.entered=[]; game.attempts=0; game.solved=false; game.finished=false;
+  const key = currentKey();
+  el.card.classList.remove('correct','wrong');
+  el.chordName.textContent = CHORDS[key].name;
+  el.chordHint.textContent = 'Besifring: ' + key + ' – hvilke ' + CHORDS[key].tones.length + ' toner hører til?';
+  el.chordAnswer.textContent = '';
+  el.nextBtn.textContent = (game.idx >= activeList().length-1) ? 'Fullfør ✔' : 'Neste akkord →';
+  setFeedback('', '');
+  render();
+}
+function startOver(){ game.idx=0; game.randomList=null; loadChord(); }
+function finish(){
+  game.finished = true;
+  el.card.classList.remove('wrong'); el.card.classList.add('correct');
+  el.chordName.textContent = 'Ferdig! 🎉';
+  el.chordHint.textContent = 'Du fullførte hele rekken!';
+  el.chordAnswer.textContent = 'Tamagotchi-metthet: ' + Math.round(game.hunger) + '%';
+  setFeedback('Bra jobba! Tamagotchien overlevde rekken! 🐣', 'good');
+  el.nextBtn.textContent = 'Start på nytt 🔄';
+  save(); render();
+}
+async function playWholeProgression(){
+  if(!game.alive) return;
+  const list = activeList();
+  el.playAll.disabled = true;
+  for(let i=0;i<list.length;i++){
+    game.idx=i; renderProgress();
+    playChordKey(list[i],1.1,false);
+    await new Promise(r=>setTimeout(r,1400));
+  }
+  game.idx=0; loadChord();
+  el.playAll.disabled=false;
+}
+
+/* ================= Rendering ================= */
+function setFeedback(msg,cls){ el.feedback.textContent=msg; el.feedback.className=cls||''; }
+function renderAll(){ renderPet(); render(); }
+function render(){
+  renderPet(); renderStaff(); renderChips(); renderProgress();
+  el.checkBtn.disabled = !game.entered.length || game.solved || !game.alive || game.finished;
+}
+function renderChips(){
+  el.chips.innerHTML='';
+  game.entered.forEach(function(e,i){
+    const chip=document.createElement('span'); chip.className='chip';
+    const play=document.createElement('button'); play.type='button'; play.className='play';
+    play.textContent=e.note.label+' 🔊'; play.title='Hør tonen';
+    play.addEventListener('click',function(){ playTones([e.note.midi],0.8,false); });
+    const rm=document.createElement('button'); rm.type='button'; rm.className='rm'; rm.textContent='×'; rm.title='Fjern';
+    rm.addEventListener('click',function(){ game.entered.splice(i,1); render(); });
+    chip.appendChild(play); chip.appendChild(rm);
+    el.chips.appendChild(chip);
+  });
+}
+function renderProgress(){
+  el.progress.innerHTML='';
+  activeList().forEach(function(k,i){
+    const d=document.createElement('span');
+    d.className='dot'+(i<game.idx||(game.solved&&i===game.idx)?' done':i===game.idx?' current':'');
+    d.textContent=(i<game.idx||(game.solved&&i===game.idx)?'✓ ':'')+CHORDS[k].name;
+    el.progress.appendChild(d);
+  });
+}
+function renderStaff(){
+  const W=380,H=130,top=28,gap=10,bottom=top+4*gap;
+  const color = game.solved ? '#16a34a' : '#111827';
+  let s='';
+  for(let i=0;i<5;i++){ const y=top+i*gap; s+='<line x1="10" y1="'+y+'" x2="'+(W-10)+'" y2="'+y+'" stroke="#94a3b8" stroke-width="1.2"/>'; }
+  s+='<text x="12" y="'+(bottom+4)+'" font-size="52" font-family="Georgia,\'Apple Symbols\',\'Segoe UI Symbol\',serif" fill="#111827">𝄞</text>';
+  const notes=game.entered.map(e=>e.note);
+  if(!notes.length){
+    s+='<text x="'+(W/2)+'" y="'+(bottom-12)+'" text-anchor="middle" font-size="14" fill="#9ca3af" font-family="sans-serif">notene du skriver inn vises her…</text>';
+  }
+  let prev=null;
+  notes.forEach(function(n,i){
+    const steps=n.oct*7+LETTERS.indexOf(n.letter)-30;
+    let cx=70+i*34, cy=bottom-steps*gap/2, second=false;
+    if(prev!==null && Math.abs(steps-prev)===1){ cx-=14; second=true; }
+    if(steps<0){ for(let L=-2;L>=steps;L-=2){ const y=bottom-L*gap/2; s+='<line x1="'+(cx-10)+'" y1="'+y+'" x2="'+(cx+10)+'" y2="'+y+'" stroke="#111827" stroke-width="1.2"/>'; } }
+    if(steps>8){ for(let L=10;L<=steps;L+=2){ const y=bottom-L*gap/2; s+='<line x1="'+(cx-10)+'" y1="'+y+'" x2="'+(cx+10)+'" y2="'+y+'" stroke="#111827" stroke-width="1.2"/>'; } }
+    if(n.acc!==0) s+='<text x="'+(cx-20)+'" y="'+(cy+5)+'" font-size="18" font-weight="bold" fill="'+color+'" font-family="sans-serif">'+(n.acc>0?'♯':'♭')+'</text>';
+    const stemUp = second ? false : steps<4;
+    s+='<ellipse cx="'+cx+'" cy="'+cy+'" rx="6.5" ry="4.6" fill="'+color+'" transform="rotate(-18 '+cx+' '+cy+')"/>';
+    if(stemUp) s+='<line x1="'+(cx+5.8)+'" y1="'+(cy-1)+'" x2="'+(cx+5.8)+'" y2="'+(cy-34)+'" stroke="'+color+'" stroke-width="1.6"/>';
+    else s+='<line x1="'+(cx-5.8)+'" y1="'+(cy+1)+'" x2="'+(cx-5.8)+'" y2="'+(cy+34)+'" stroke="'+color+'" stroke-width="1.6"/>';
+    prev=steps;
+  });
+  el.staffWrap.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">'+s+'</svg>';
+}
+
+/* ================= Oppstart ================= */
+if(typeof document !== 'undefined'){
+  window.addEventListener('error',function(e){
+    var b=document.getElementById('errbanner');
+    if(b){ b.style.display='block'; b.textContent='⚠ Feil: '+e.message+' (linje '+e.lineno+')'; }
+  });
+  try{
+    load();
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init);
+    else init();
+  }catch(err){
+    var b=document.getElementById('errbanner');
+    if(b){ b.style.display='block'; b.textContent='⚠ Oppstartfeil: '+err.message; }
+  }
+  window.__tama = game; // for debugging
+}
+</script>
+</body>
+</html>

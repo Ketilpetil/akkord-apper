@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Akkordtoner – øv på besifring</title>
+<style>
+  :root{
+    --bg:#f4f5fb; --card:#ffffff; --ink:#1f2937; --muted:#6b7280;
+    --accent:#6366f1; --accent2:#8b5cf6; --good:#16a34a; --good-bg:#ecfdf3;
+    --bad:#dc2626; --line:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    background:var(--bg); color:var(--ink); min-height:100vh;
+  }
+  header{
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    color:#fff; padding:20px 24px;
+  }
+  header h1{margin:0; font-size:1.5rem}
+  header p{margin:6px 0 0; opacity:.9; font-size:.95rem}
+  main{max-width:780px; margin:0 auto; padding:18px 16px 40px}
+
+  .toolbar{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:14px}
+  .toolbar label{font-size:.9rem; color:var(--muted); font-weight:600}
+  select, input[type=text]{
+    font:inherit; padding:9px 12px; border:1px solid var(--line); border-radius:10px; background:#fff;
+  }
+  select{max-width:100%}
+
+  .card{
+    background:var(--card); border-radius:18px; padding:22px;
+    box-shadow:0 6px 24px rgba(30,27,75,.08); border:2px solid transparent;
+    transition:background .35s, border-color .35s;
+  }
+  .card.correct{background:var(--good-bg); border-color:var(--good)}
+  .card.wrong{animation:shake .4s}
+  @keyframes shake{
+    0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)}
+    40%{transform:translateX(8px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)}
+  }
+
+  .chord-row{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap}
+  .chord-name{font-size:2.8rem; font-weight:800; color:var(--accent); line-height:1; transition:color .35s}
+  .card.correct .chord-name{color:var(--good)}
+  .chord-hint{color:var(--muted); font-size:1rem}
+  .chord-answer{font-weight:700; color:var(--good); font-size:1.05rem; min-height:1.4em}
+
+  #staffWrap{max-width:420px; margin:10px auto 4px; background:#fffdf5; border:1px solid var(--line); border-radius:12px; overflow:hidden}
+  #staffWrap svg{display:block; width:100%; height:auto}
+  #errbanner{display:none; background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; border-radius:10px; padding:10px 14px; margin-bottom:12px; font-weight:600}
+
+  #chips{display:flex; flex-wrap:wrap; gap:8px; min-height:38px; margin:8px 0 4px}
+  .chip{
+    display:inline-flex; align-items:center; gap:6px; background:#eef2ff; color:#3730a3;
+    border-radius:999px; padding:5px 6px 5px 12px; font-weight:700; border:1px solid #c7d2fe;
+  }
+  .card.correct .chip{background:#dcfce7; color:#166534; border-color:#86efac}
+  .chip .play{border:none; background:transparent; cursor:pointer; font-size:.85rem; padding:2px 4px}
+  .chip .rm{border:none; background:rgba(0,0,0,.08); border-radius:50%; width:20px; height:20px; cursor:pointer; font-size:.8rem; line-height:1; padding:0}
+  .chip .rm:hover{background:rgba(220,38,38,.25)}
+
+  #feedback{min-height:1.6em; font-weight:600; margin:6px 0 10px}
+  #feedback.good{color:var(--good)} #feedback.bad{color:var(--bad)} #feedback.warn{color:#b45309}
+
+  .actions{display:flex; flex-wrap:wrap; gap:10px}
+  button{cursor:pointer; font:inherit; font-weight:700; border-radius:12px; border:none; padding:11px 18px; transition:transform .08s, filter .15s}
+  button:hover{filter:brightness(1.06)} button:active{transform:scale(.97)}
+  button:disabled{opacity:.45; cursor:not-allowed}
+  .btn-primary{background:var(--accent); color:#fff}
+  .btn-good{background:var(--good); color:#fff}
+  .btn-ghost{background:#fff; border:1px solid var(--line); color:var(--ink)}
+  .btn-next{background:var(--good); color:#fff; display:none}
+  .card.correct .btn-next{display:inline-block}
+
+  .pad{
+    margin-top:16px; background:var(--card); border-radius:18px; padding:18px;
+    box-shadow:0 6px 24px rgba(30,27,75,.08);
+  }
+  .pad h2{margin:0 0 10px; font-size:1.05rem}
+  .seg{display:inline-flex; border:1px solid var(--line); border-radius:10px; overflow:hidden; margin-right:10px; vertical-align:middle}
+  .seg button{border-radius:0; padding:9px 14px; background:#fff; border:none; border-right:1px solid var(--line)}
+  .seg button:last-child{border-right:none}
+  .seg button.active{background:var(--accent); color:#fff}
+  .notes{display:flex; flex-wrap:wrap; gap:8px; margin:12px 0}
+  .notes button{
+    width:52px; height:52px; font-size:1.25rem; font-weight:800; border-radius:12px;
+    background:#1f2937; color:#fff;
+  }
+  .notes button:hover{background:var(--accent)}
+  .textrow{display:flex; gap:8px; flex-wrap:wrap}
+  .textrow input{flex:1; min-width:180px}
+  .help{font-size:.85rem; color:var(--muted); margin-top:10px; line-height:1.5}
+  kbd{background:#e5e7eb; border-radius:5px; padding:1px 6px; font-family:inherit; font-size:.8rem}
+
+  .progress{display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; align-items:center}
+  .progress .dot{
+    padding:6px 12px; border-radius:999px; background:#fff; border:1px solid var(--line);
+    font-weight:700; font-size:.9rem; color:var(--muted);
+  }
+  .progress .dot.current{background:var(--accent); color:#fff; border-color:var(--accent)}
+  .progress .dot.done{background:var(--good-bg); color:var(--good); border-color:var(--good)}
+  .score{margin-left:auto; font-weight:700; color:var(--accent2)}
+</style>
+</head>
+<body>
+<header>
+  <h1>🎵 Akkordtoner</h1>
+  <p>Se på besifringen – skriv inn tonene som hører til akkorden – og hør om det stemmer!</p>
+</header>
+<main>
+  <div id="errbanner"></div>
+  <div class="toolbar">
+    <label for="prog">Akkordrekke:</label>
+    <select id="prog"></select>
+    <button id="playAll" class="btn-ghost" type="button">▶ Spill hele rekken</button>
+  </div>
+
+  <section class="card" id="card">
+    <div class="chord-row">
+      <div class="chord-name" id="chordName">C-dur</div>
+      <div class="chord-hint" id="chordHint">Hvilke toner hører til?</div>
+    </div>
+    <div class="chord-answer" id="chordAnswer"></div>
+    <div id="staffWrap" role="img" aria-label="Notelinje med tonene du har skrevet inn"></div>
+    <div id="chips"></div>
+    <div id="feedback"></div>
+    <div class="actions">
+      <button id="playBtn" class="btn-primary" type="button">🔊 Spill det jeg har skrevet</button>
+      <button id="arpBtn" class="btn-ghost" type="button">🎶 Spill som arpeggio</button>
+      <button id="checkBtn" class="btn-good" type="button">✔ Sjekk svar</button>
+      <button id="answerBtn" class="btn-ghost" type="button">👂 Hør fasit</button>
+      <button id="clearBtn" class="btn-ghost" type="button">🗑 Tøm</button>
+      <button id="nextBtn" class="btn-next" type="button">Neste akkord →</button>
+    </div>
+  </section>
+
+  <section class="pad">
+    <h2>Skriv inn toner</h2>
+    <div>
+      <span class="seg" id="octSeg" title="Oktave">
+        <button type="button" data-oct="3">3</button><button type="button" data-oct="4" class="active">4</button><button type="button" data-oct="5">5</button>
+      </span>
+      <span class="seg" id="accSeg" title="Fortegn">
+        <button type="button" data-acc="0" class="active">♮</button><button type="button" data-acc="1">♯</button><button type="button" data-acc="-1">♭</button>
+      </span>
+    </div>
+    <div class="notes" id="notePad"></div>
+    <div class="textrow">
+      <input type="text" id="noteInput" placeholder="eller skriv f.eks. «c e g» og trykk Enter">
+      <button id="addBtn" class="btn-primary" type="button">Legg til</button>
+    </div>
+    <p class="help">
+      Tips: klikk på tonene over, skriv i feltet, eller bruk tastaturet (<kbd>c</kbd> <kbd>d</kbd> <kbd>e</kbd> <kbd>f</kbd> <kbd>g</kbd> <kbd>a</kbd> <kbd>h</kbd>).
+      Norsk notasjon: <b>H</b> = B-naturlig, <b>B</b> = Bb. Skriv <kbd>#</kbd> eller <kbd>b</kbd> etter bokstaven for fortegn, f.eks. <i>f#</i>.
+      Standard oktave er 4 (C4 = ettstrekede C). Klikk på en note-boble for å høre den.
+    </p>
+  </section>
+
+  <div class="progress" id="progress"></div>
+  <div class="score" id="score"></div>
+</main>
+
+<script>
+'use strict';
+
+/* ---------- Musikkdata ---------- */
+const SEMI = {C:0, D:2, E:4, F:5, G:7, A:9, H:11};
+const LETTERS = ['C','D','E','F','G','A','H'];
+
+// Norsk besifring. B = Bb, H = B-naturlig.
+const CHORDS = {
+  'C':   {name:'C-dur',   tones:['C','E','G']},
+  'G':   {name:'G-dur',   tones:['G','H','D']},
+  'F':   {name:'F-dur',   tones:['F','A','C']},
+  'D':   {name:'D-dur',   tones:['D','F#','A']},
+  'A':   {name:'A-dur',   tones:['A','C#','E']},
+  'E':   {name:'E-dur',   tones:['E','G#','H']},
+  'Am':  {name:'A-moll',  tones:['A','C','E']},
+  'Dm':  {name:'D-moll',  tones:['D','F','A']},
+  'Em':  {name:'E-moll',  tones:['E','G','H']},
+  'Bm':  {name:'H-moll',  tones:['H','D','F#']},
+  'Gm':  {name:'G-moll',  tones:['G','B','D']},
+  'B':   {name:'B-dur',   tones:['B','D','F']},   // B = Bb
+  'C7':  {name:'C7',      tones:['C','E','G','B']},
+  'G7':  {name:'G7',      tones:['G','H','D','F']},
+  'D7':  {name:'D7',      tones:['D','F#','A','C']},
+  'Am7': {name:'Am7',     tones:['A','C','E','G']},
+  'Dm7': {name:'Dm7',     tones:['D','F','A','C']},
+  'Em7': {name:'Em7',     tones:['E','G','H','D']}
+};
+
+// Naturlige akkordrekker (diatoniske i C-dur m.fl.)
+const PROGRESSIONS = {
+  'I–V–vi–IV  (C–G–Am–F)':      ['C','G','Am','F'],
+  'I–IV–V–I  (C–F–G–C)':        ['C','F','G','C'],
+  'vi–IV–I–V  (Am–F–C–G)':       ['Am','F','C','G'],
+  'ii–V–I  (Dm–G–C)':           ['Dm','G','C'],
+  'I–vi–ii–V  (C–Am–Dm–G)':     ['C','Am','Dm','G'],
+  'Blues i C (12 takter)':      ['C','C','F','C','C','G','F','C','C','G','F','C']
+};
+const RANDOM_KEY = '🎲 Tilfeldig rekke (alle akkorder)';
+
+/* ---------- Noter: parsing ---------- */
+function parseNote(tok, defOct){
+  if(!tok) return null;
+  const m = /^([a-hA-H])(#{1,2}|b{1,2}|♯{1,2}|♭{1,2})?(\d)?$/.exec(String(tok).trim());
+  if(!m) return null;
+  let letter = m[1].toUpperCase();
+  let acc = 0;
+  if(m[2]){
+    const sharps = m[2].includes('#') || m[2].includes('♯');
+    const n = m[2].length > 1 && (m[2][1] === m[2][0]) ? 2 : 1;
+    acc = sharps ? n : -n;
+  }
+  if(letter === 'B'){
+    // Norsk notasjon: B = Bb. "Bb" er samme tone; "B#" tilsvarer H# (= C).
+    acc = (m[2] && (m[2].includes('#') || m[2].includes('♯'))) ? 1 : -1;
+    letter = 'H';
+  }
+  const oct = (m[3] !== undefined) ? parseInt(m[3],10) : defOct;
+  const midi = 12*(oct+1) + SEMI[letter] + acc;
+  let label = letter + (acc > 0 ? '#'.repeat(acc) : acc < 0 ? 'b'.repeat(-acc) : '') + oct;
+  if(letter === 'H' && acc === -1) label = 'B' + oct;         // vis B i stedet for Hb
+  if(letter === 'H' && acc === -2) label = 'Hbb' + oct;
+  return {letter, acc, oct, midi, label};
+}
+function pcOf(tok){ const n = parseNote(tok, 4); return n ? ((n.midi % 12) + 12) % 12 : null; }
+function chordIsCorrect(key, notes){
+  const want = CHORDS[key].tones.map(t => pcOf(t)).sort((a,b)=>a-b).join(',');
+  const got = [...new Set(notes.map(n => ((n.midi % 12)+12)%12))].sort((a,b)=>a-b).join(',');
+  return want === got;
+}
+
+/* ---------- Lyd (Web Audio) ---------- */
+let audioCtx = null, master = null;
+function ac(){
+  if(!audioCtx){
+    const AC = window.AudioContext || window.webkitAudioContext;
+    audioCtx = new AC();
+    master = audioCtx.createDynamicsCompressor();
+    master.threshold.value = -18; master.ratio.value = 6;
+    master.connect(audioCtx.destination);
+  }
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+function freq(midi){ return 440 * Math.pow(2, (midi - 69) / 12); }
+function playTones(midis, dur, arp){
+  dur = dur || 1.3; arp = !!arp;
+  if(!midis.length) return;
+  try{
+    const c = ac();
+    const t0 = c.currentTime + 0.06;
+    midis.forEach(function(m, i){
+      const t = arp ? t0 + i*0.13 : t0;
+      const g = c.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.22, t + 0.03);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      const o1 = c.createOscillator(); o1.type = 'triangle'; o1.frequency.value = freq(m);
+      const o2 = c.createOscillator(); o2.type = 'sine';      o2.frequency.value = freq(m)*2;
+      const g2 = c.createGain(); g2.gain.value = 0.22;
+      o1.connect(g); o2.connect(g2); g2.connect(g); g.connect(master);
+      o1.start(t); o1.stop(t + dur + 0.1);
+      o2.start(t); o2.stop(t + dur + 0.1);
+    });
+  }catch(e){ /* lyd ikke tilgjengelig – ikke kast feil inn i UI-et */ }
+}
+function playChordKey(key, dur, arp){
+  playTones(CHORDS[key].tones.map(t => parseNote(t, 4).midi), dur, arp);
+}
+
+/* ---------- Tilstand ---------- */
+const state = {
+  prog: Object.keys(PROGRESSIONS)[0],
+  randomList: null,
+  idx: 0,
+  entered: [],        // [{tok, note}]
+  attempts: 0,
+  solved: false,
+  oct: 4,
+  accMode: 0,         // 0 naturlig, 1 kryss, -1 b
+  firstTry: 0,
+  total: 0,
+  finished: false
+};
+
+function activeList(){
+  if(state.prog === RANDOM_KEY){
+    if(!state.randomList){
+      const keys = Object.keys(CHORDS);
+      state.randomList = keys.sort(() => Math.random() - 0.5).slice(0, 8);
+    }
+    return state.randomList;
+  }
+  return PROGRESSIONS[state.prog];
+}
+function currentKey(){ return activeList()[state.idx]; }
+
+/* ---------- DOM ---------- */
+let el = {};
+function $(id){ return document.getElementById(id); }
+
+function init(){
+  el = {
+    prog: $('prog'), playAll: $('playAll'), card: $('card'),
+    chordName: $('chordName'), chordHint: $('chordHint'), chordAnswer: $('chordAnswer'),
+    staffWrap: $('staffWrap'), chips: $('chips'), feedback: $('feedback'),
+    playBtn: $('playBtn'), arpBtn: $('arpBtn'), checkBtn: $('checkBtn'),
+    answerBtn: $('answerBtn'), clearBtn: $('clearBtn'), nextBtn: $('nextBtn'),
+    octSeg: $('octSeg'), accSeg: $('accSeg'), notePad: $('notePad'),
+    noteInput: $('noteInput'), addBtn: $('addBtn'), progress: $('progress'), score: $('score')
+  };
+
+  // fyll rekke-velger
+  Object.keys(PROGRESSIONS).forEach(function(k){
+    const o = document.createElement('option'); o.value = k; o.textContent = k; el.prog.appendChild(o);
+  });
+  const ro = document.createElement('option'); ro.value = RANDOM_KEY; ro.textContent = RANDOM_KEY; el.prog.appendChild(ro);
+  el.prog.value = state.prog;
+
+  // noteknapper
+  LETTERS.forEach(function(L){
+    const b = document.createElement('button');
+    b.type = 'button'; b.textContent = L;
+    b.addEventListener('click', function(){ addToken(L + (state.accMode === 1 ? '#' : state.accMode === -1 ? 'b' : '') + state.oct, true); });
+    el.notePad.appendChild(b);
+  });
+
+  el.octSeg.addEventListener('click', function(e){
+    const b = e.target.closest('button'); if(!b) return;
+    state.oct = parseInt(b.dataset.oct, 10);
+    [...el.octSeg.querySelectorAll('button')].forEach(x => x.classList.toggle('active', x === b));
+  });
+  el.accSeg.addEventListener('click', function(e){
+    const b = e.target.closest('button'); if(!b) return;
+    state.accMode = parseInt(b.dataset.acc, 10);
+    [...el.accSeg.querySelectorAll('button')].forEach(x => x.classList.toggle('active', x === b));
+  });
+
+  el.prog.addEventListener('change', function(){ state.prog = el.prog.value; state.randomList = null; startOver(); });
+  el.playAll.addEventListener('click', playWholeProgression);
+  el.playBtn.addEventListener('click', function(){ playEntered(false); });
+  el.arpBtn.addEventListener('click', function(){ playEntered(true); });
+  el.checkBtn.addEventListener('click', check);
+  el.answerBtn.addEventListener('click', function(){ playChordKey(currentKey(), 1.6, false); });
+  el.clearBtn.addEventListener('click', function(){ state.entered = []; render(); });
+  el.nextBtn.addEventListener('click', next);
+  el.addBtn.addEventListener('click', addFromText);
+  el.noteInput.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); addFromText(); } });
+
+  document.addEventListener('keydown', function(e){
+    if(e.target === el.noteInput || e.metaKey || e.ctrlKey || e.altKey) return;
+    const k = e.key.toLowerCase();
+    if(LETTERS.map(x => x.toLowerCase()).includes(k)) addToken(k.toUpperCase() + state.oct, true);
+  });
+
+  // Lås opp lyden ved første klikk/tastetrykk (Safari krever brukerinteraksjon)
+  document.addEventListener('pointerdown', function unlock(){
+    try{ ac(); }catch(e){}
+    document.removeEventListener('pointerdown', unlock);
+  });
+
+  loadChord();
+}
+
+function addToken(tok, sound){
+  const n = parseNote(tok, state.oct);
+  if(!n){ setFeedback('Kunne ikke lese "' + tok + '" – prøv f.eks. c, f# eller b4', 'warn'); return false; }
+  state.entered.push({tok: tok, note: n});
+  if(sound) playTones([n.midi], 0.6, false);
+  render();
+  return true;
+}
+function addFromText(){
+  const v = el.noteInput.value.trim();
+  if(!v) return;
+  const toks = v.split(/[\s,;]+/).filter(Boolean);
+  let added = 0;
+  toks.forEach(function(t){ if(addToken(t, added === 0)) added++; });
+  el.noteInput.value = '';
+  if(added === 0) setFeedback('Ingen gyldige toner i "' + v + '" – prøv f.eks. «c e g»', 'warn');
+  render();
+}
+function playEntered(arp){
+  if(!state.entered.length){ setFeedback('Skriv inn noen toner først 🙂', 'warn'); return; }
+  playTones(state.entered.map(e => e.note.midi), 1.4, arp);
+}
+
+/* ---------- Sjekk / spill ---------- */
+function check(){
+  if(state.finished) return;
+  if(!state.entered.length){ setFeedback('Skriv inn tonene i akkorden først 🙂', 'warn'); return; }
+  state.attempts++;
+  const key = currentKey();
+  const want = CHORDS[key].tones.map(t => pcOf(t));
+  const gotSet = [...new Set(state.entered.map(e => ((e.note.midi % 12) + 12) % 12))];
+  const hits = gotSet.filter(p => want.includes(p)).length;
+  if(chordIsCorrect(key, state.entered.map(e => e.note)) && gotSet.length === want.length){
+    state.solved = true;
+    state.total++;
+    if(state.attempts === 1) state.firstTry++;
+    el.card.classList.remove('wrong'); el.card.classList.add('correct');
+    setFeedback('Riktig! 🎉', 'good');
+    el.chordAnswer.textContent = CHORDS[key].name + ' = ' + CHORDS[key].tones.join(' – ');
+    playChordKey(key, 1.6, false);
+    setTimeout(function(){ playChordKey(key, 1.2, true); }, 500);
+    render();
+  } else {
+    el.card.classList.remove('wrong'); void el.card.offsetWidth; el.card.classList.add('wrong');
+    setFeedback('Ikke helt… Du har ' + hits + ' av ' + want.length + ' riktige toner (' +
+      gotSet.length + ' forskjellige). Prøv igjen, eller trykk «Hør fasit» 👂', 'bad');
+    playTones(state.entered.map(e => e.note.midi), 1.0, false);
+    render();
+  }
+}
+
+function next(){
+  if(state.finished){ startOver(); return; }
+  const list = activeList();
+  if(state.idx >= list.length - 1){
+    finish();
+    return;
+  }
+  state.idx++;
+  loadChord();
+}
+function loadChord(){
+  state.entered = []; state.attempts = 0; state.solved = false; state.finished = false;
+  const key = currentKey();
+  el.card.classList.remove('correct','wrong');
+  el.chordName.textContent = CHORDS[key].name;
+  el.chordHint.textContent = 'Besifring: ' + key + ' – hvilke ' + CHORDS[key].tones.length + ' toner hører til?';
+  el.chordAnswer.textContent = '';
+  el.nextBtn.textContent = (state.idx >= activeList().length - 1) ? 'Fullfør ✔' : 'Neste akkord →';
+  setFeedback('', '');
+  if(el.noteInput) el.noteInput.value = '';
+  render();
+}
+function startOver(){
+  state.idx = 0; state.firstTry = 0; state.total = 0; state.randomList = null;
+  loadChord();
+}
+function finish(){
+  state.finished = true;
+  el.card.classList.remove('wrong'); el.card.classList.add('correct');
+  el.chordName.textContent = 'Ferdig! 🎉';
+  el.chordHint.textContent = 'Du fullførte hele rekken!';
+  el.chordAnswer.textContent = 'Riktig på første forsøk: ' + state.firstTry + ' av ' + state.total;
+  setFeedback(state.firstTry === state.total ? 'Fantastisk – alt riktig med én gang! 🌟' : 'Bra jobba! Øv gjerne rekken en gang til.', 'good');
+  el.nextBtn.textContent = 'Start på nytt 🔄';
+  activeList().forEach(function(k){ playChordKey(k, 0.9, false); });
+  render();
+}
+
+async function playWholeProgression(){
+  const list = activeList();
+  el.playAll.disabled = true;
+  for(let i = 0; i < list.length; i++){
+    state.idx = i; renderProgress();
+    playChordKey(list[i], 1.1, false);
+    await new Promise(r => setTimeout(r, 1400));
+  }
+  state.idx = 0; loadChord();
+  el.playAll.disabled = false;
+}
+
+/* ---------- Rendering ---------- */
+function setFeedback(msg, cls){ el.feedback.textContent = msg; el.feedback.className = cls || ''; }
+
+function render(){
+  renderStaff();
+  renderChips();
+  renderProgress();
+  el.checkBtn.disabled = !state.entered.length || state.solved || state.finished;
+  el.score.textContent = '⭐ På første forsøk: ' + state.firstTry + ' / ' + state.total;
+}
+function renderChips(){
+  el.chips.innerHTML = '';
+  state.entered.forEach(function(e, i){
+    const chip = document.createElement('span'); chip.className = 'chip';
+    const play = document.createElement('button'); play.type = 'button'; play.className = 'play';
+    play.textContent = e.note.label + ' 🔊'; play.title = 'Hør denne tonen';
+    play.addEventListener('click', function(){ playTones([e.note.midi], 0.8, false); });
+    const rm = document.createElement('button'); rm.type = 'button'; rm.className = 'rm'; rm.textContent = '×'; rm.title = 'Fjern';
+    rm.addEventListener('click', function(){ state.entered.splice(i, 1); render(); });
+    chip.appendChild(play); chip.appendChild(rm);
+    el.chips.appendChild(chip);
+  });
+}
+function renderProgress(){
+  el.progress.innerHTML = '';
+  const list = activeList();
+  list.forEach(function(k, i){
+    const d = document.createElement('span');
+    d.className = 'dot' + (i < state.idx || state.solved && i === state.idx ? ' done' : i === state.idx ? ' current' : '');
+    d.textContent = (i < state.idx || (state.solved && i === state.idx) ? '✓ ' : '') + CHORDS[k].name;
+    el.progress.appendChild(d);
+  });
+}
+function renderStaff(){
+  const W = 380, H = 130, top = 28, gap = 10, bottom = top + 4*gap; // nederste linje = E4
+  const color = state.solved ? '#16a34a' : '#111827';
+  let s = '';
+  for(let i = 0; i < 5; i++){
+    const y = top + i*gap;
+    s += '<line x1="10" y1="' + y + '" x2="' + (W-10) + '" y2="' + y + '" stroke="#94a3b8" stroke-width="1.2"/>';
+  }
+  s += '<text x="12" y="' + (bottom + 4) + '" font-size="52" font-family="Georgia,\'Apple Symbols\',\'Segoe UI Symbol\',serif" fill="#111827">𝄞</text>';
+  const notes = state.entered.map(e => e.note);
+  if(!notes.length){
+    s += '<text x="' + (W/2) + '" y="' + (bottom - 12) + '" text-anchor="middle" font-size="14" fill="#9ca3af" font-family="sans-serif">notene du skriver inn vises her…</text>';
+  }
+  let prevSteps = null;
+  notes.forEach(function(n, i){
+    const d = n.oct*7 + LETTERS.indexOf(n.letter);
+    const steps = d - 30;                       // antall diatoniske steg over E4
+    let cx = 70 + i*34, cy = bottom - steps*gap/2;
+    let second = false;
+    if(prevSteps !== null && Math.abs(steps - prevSteps) === 1){ cx -= 14; second = true; }
+    // streker (hjelpelinjer)
+    if(steps < 0){ for(let L = -2; L >= steps; L -= 2){ const y = bottom - L*gap/2; s += '<line x1="' + (cx-10) + '" y1="' + y + '" x2="' + (cx+10) + '" y2="' + y + '" stroke="#111827" stroke-width="1.2"/>'; } }
+    if(steps > 8){ for(let L = 10; L <= steps; L += 2){ const y = bottom - L*gap/2; s += '<line x1="' + (cx-10) + '" y1="' + y + '" x2="' + (cx+10) + '" y2="' + y + '" stroke="#111827" stroke-width="1.2"/>'; } }
+    if(n.acc !== 0){
+      s += '<text x="' + (cx-20) + '" y="' + (cy+5) + '" font-size="18" font-weight="bold" fill="' + color + '" font-family="sans-serif">' + (n.acc > 0 ? '♯' : '♭') + '</text>';
+    }
+    const stemUp = second ? false : steps < 4;
+    s += '<ellipse cx="' + cx + '" cy="' + cy + '" rx="6.5" ry="4.6" fill="' + color + '" transform="rotate(-18 ' + cx + ' ' + cy + ')"/>';
+    if(stemUp) s += '<line x1="' + (cx+5.8) + '" y1="' + (cy-1) + '" x2="' + (cx+5.8) + '" y2="' + (cy-34) + '" stroke="' + color + '" stroke-width="1.6"/>';
+    else       s += '<line x1="' + (cx-5.8) + '" y1="' + (cy+1) + '" x2="' + (cx-5.8) + '" y2="' + (cy+34) + '" stroke="' + color + '" stroke-width="1.6"/>';
+    prevSteps = steps;
+  });
+  // Merk: vi setter innerHTML på en vanlig <div> (ikke direkte på <svg>),
+  // fordi innerHTML på SVG-elementer ikke støttes i alle nettlesere (f.eks. Safari).
+  el.staffWrap.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg">' + s + '</svg>';
+}
+
+if(typeof document !== 'undefined'){
+  // Vis JS-feil på siden slik at de er enkle å rapportere
+  window.addEventListener('error', function(e){
+    var b = document.getElementById('errbanner');
+    if(b){ b.style.display = 'block'; b.textContent = '⚠ Det oppstod en feil: ' + e.message + ' (linje ' + e.lineno + '). Prøv å laste siden på nytt.'; }
+  });
+  try{
+    if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+    else init();
+  }catch(err){
+    var b = document.getElementById('errbanner');
+    if(b){ b.style.display = 'block'; b.textContent = '⚠ Oppstartfeil: ' + err.message; }
+  }
+}
+</script>
+</body>
+</html>
