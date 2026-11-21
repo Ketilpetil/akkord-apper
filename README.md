@@ -22,8 +22,9 @@ Tips: I Chrome/Edge/Safari/Firefox, sjekk at adressefeltet viser `file:///...` �
 ## Funksjoner
 
 - Besifring (akkordsymbol) vises stort; eleven skriver inn akkordtonene
-- Noter skrives inn via noteknapper, tekstfelt (f.eks. `c e g`) eller tastaturet (`c d e f g a h`)
-- Norsk notasjon: **H = B-naturlig, B = Bb**; fortegn med `#`/`b` (f.eks. `f#`); oktave 3–5
+- Noter skrives inn via **pianotastatur med navn på tastene** (svarte tast viser doble navn C♯/D♭ osv., `shift`+klikk gir b), tekstfelt (f.eks. `c e g`) eller tastaturet (`c d e f g a b`)
+- Notasjon: **B = B-naturlig** (`h` virker også), **Bb skrives `bb`**; kryss `#`, dobbeltkryss `##`/`x`, b `b` etter bokstaven (f.eks. `eb`, `dbb` = dobbelt-b); oktave 3–5
+- Notnavnene vises under notelinjen, rett under hver note
 - 🔊 Spill av det man har skrevet (blokk eller arpeggio), «Hør fasit», «Spill hele rekken"
 - Notene tegnes på en notelinje (SVG); riktig svar blir **grønt**
 - Flere akkordrekker i ulike tonearter (C-dur, G-dur, F-dur, A-moll, D-moll, 7-akkorder, blues) + tilfeldig rekke

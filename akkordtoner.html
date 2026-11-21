@@ -84,12 +84,13 @@
   .seg button{border-radius:0; padding:9px 14px; background:#fff; border:none; border-right:1px solid var(--line)}
   .seg button:last-child{border-right:none}
   .seg button.active{background:var(--accent); color:#fff}
-  .notes{display:flex; flex-wrap:wrap; gap:8px; margin:12px 0}
-  .notes button{
-    width:52px; height:52px; font-size:1.25rem; font-weight:800; border-radius:12px;
-    background:#1f2937; color:#fff;
-  }
-  .notes button:hover{background:var(--accent)}
+  .piano{position:relative;display:flex;height:120px;margin:12px 0 4px;user-select:none;max-width:560px}
+  .pkey{flex:1;background:#fff;border:1px solid #d1d5db;border-radius:0 0 8px 8px;display:flex;align-items:flex-end;justify-content:center;padding:0 0 8px;cursor:pointer;color:#374151}
+  .pkey:hover{background:#eef2ff}
+  .pkey .nm{font-size:1.15rem;font-weight:800}
+  .pkey .nm small{font-size:.62rem;color:#9ca3af;margin-left:2px;font-weight:600}
+  .bkey{position:absolute;top:0;width:9%;height:60%;background:#111827;color:#fff;border:none;border-radius:0 0 6px 6px;display:flex;align-items:flex-end;justify-content:center;padding:0 0 6px;font-size:.58rem;font-weight:700;line-height:1.2;text-align:center;cursor:pointer;z-index:2}
+  .bkey:hover{background:var(--accent)}
   .textrow{display:flex; gap:8px; flex-wrap:wrap}
   .textrow input{flex:1; min-width:180px}
   .help{font-size:.85rem; color:var(--muted); margin-top:10px; line-height:1.5}
@@ -143,20 +144,14 @@
       <span class="seg" id="octSeg" title="Oktave">
         <button type="button" data-oct="3">3</button><button type="button" data-oct="4" class="active">4</button><button type="button" data-oct="5">5</button>
       </span>
-      <span class="seg" id="accSeg" title="Fortegn">
-        <button type="button" data-acc="0" class="active">♮</button><button type="button" data-acc="1">♯</button><button type="button" data-acc="-1">♭</button>
-      </span>
+      <span style="font-size:.85rem;color:var(--muted)">velg oktave, klikk på pianoet:</span>
     </div>
-    <div class="notes" id="notePad"></div>
+    <div class="piano" id="piano"></div>
     <div class="textrow">
       <input type="text" id="noteInput" placeholder="eller skriv f.eks. «c e g» og trykk Enter">
       <button id="addBtn" class="btn-primary" type="button">Legg til</button>
     </div>
-    <p class="help">
-      Tips: klikk på tonene over, skriv i feltet, eller bruk tastaturet (<kbd>c</kbd> <kbd>d</kbd> <kbd>e</kbd> <kbd>f</kbd> <kbd>g</kbd> <kbd>a</kbd> <kbd>h</kbd>).
-      Norsk notasjon: <b>H</b> = B-naturlig, <b>B</b> = Bb. Skriv <kbd>#</kbd> eller <kbd>b</kbd> etter bokstaven for fortegn, f.eks. <i>f#</i>.
-      Standard oktave er 4 (C4 = ettstrekede C). Klikk på en note-boble for å høre den.
-    </p>
+    <p class="help">Klikk på <b>pianotastene</b> (svarte tast har <b>doble navn</b>: C♯/D♭, D♯/E♭, F♯/G♭, G♯/A♭, A♯/B♭ – <kbd>shift</kbd>+klikk gir b-versjonen), skriv i feltet (f.eks. «c e g»), eller bruk tastaturet (<kbd>c</kbd> <kbd>d</kbd> <kbd>e</kbd> <kbd>f</kbd> <kbd>g</kbd> <kbd>a</kbd> <kbd>b</kbd>). Notasjon: <b>B</b> = B-naturlig (<kbd>h</kbd> virker også), <b>Bb</b> skrives <i>bb</i>. Kryss: <kbd>#</kbd> etter bokstaven (f.eks. <i>f#</i>), dobbeltkryss: <i>##</i> eller <i>x</i>. B: <kbd>b</kbd> etter bokstaven (f.eks. <i>eb</i> = E♭, <i>dbb</i> = D dobbelt-b). Standard oktave er 4. Klikk på en note-boble for å høre den.</p>
   </section>
 
   <div class="progress" id="progress"></div>
@@ -167,29 +162,29 @@
 'use strict';
 
 /* ---------- Musikkdata ---------- */
-const SEMI = {C:0, D:2, E:4, F:5, G:7, A:9, H:11};
-const LETTERS = ['C','D','E','F','G','A','H'];
+const SEMI = {C:0, D:2, E:4, F:5, G:7, A:9, B:11, H:11};   // B og H er samme tone (B-naturlig)
+const LETTERS = ['C','D','E','F','G','A','B'];
 
-// Norsk besifring. B = Bb, H = B-naturlig.
 const CHORDS = {
   'C':   {name:'C-dur',   tones:['C','E','G']},
-  'G':   {name:'G-dur',   tones:['G','H','D']},
+  'G':   {name:'G-dur',   tones:['G','B','D']},
   'F':   {name:'F-dur',   tones:['F','A','C']},
   'D':   {name:'D-dur',   tones:['D','F#','A']},
   'A':   {name:'A-dur',   tones:['A','C#','E']},
-  'E':   {name:'E-dur',   tones:['E','G#','H']},
+  'E':   {name:'E-dur',   tones:['E','G#','B']},
   'Am':  {name:'A-moll',  tones:['A','C','E']},
   'Dm':  {name:'D-moll',  tones:['D','F','A']},
-  'Em':  {name:'E-moll',  tones:['E','G','H']},
-  'Bm':  {name:'H-moll',  tones:['H','D','F#']},
-  'Gm':  {name:'G-moll',  tones:['G','B','D']},
-  'B':   {name:'B-dur',   tones:['B','D','F']},   // B = Bb
-  'C7':  {name:'C7',      tones:['C','E','G','B']},
-  'G7':  {name:'G7',      tones:['G','H','D','F']},
+  'Em':  {name:'E-moll',  tones:['E','G','B']},
+  'Bm':  {name:'B-moll',  tones:['B','D','F#']},
+  'Gm':  {name:'G-moll',  tones:['G','Bb','D']},
+  'B':   {name:'B-dur',   tones:['B','D#','F#']},
+  'Bb':  {name:'B♭-dur',  tones:['Bb','D','F']},
+  'C7':  {name:'C7',      tones:['C','E','G','Bb']},
+  'G7':  {name:'G7',      tones:['G','B','D','F']},
   'D7':  {name:'D7',      tones:['D','F#','A','C']},
   'Am7': {name:'Am7',     tones:['A','C','E','G']},
   'Dm7': {name:'Dm7',     tones:['D','F','A','C']},
-  'Em7': {name:'Em7',     tones:['E','G','H','D']}
+  'Em7': {name:'Em7',     tones:['E','G','B','D']}
 };
 
 // Naturlige akkordrekker (diatoniske i C-dur m.fl.)
@@ -206,25 +201,20 @@ const RANDOM_KEY = '🎲 Tilfeldig rekke (alle akkorder)';
 /* ---------- Noter: parsing ---------- */
 function parseNote(tok, defOct){
   if(!tok) return null;
-  const m = /^([a-hA-H])(#{1,2}|b{1,2}|♯{1,2}|♭{1,2})?(\d)?$/.exec(String(tok).trim());
+  const m = /^([a-hA-H])(#{1,2}|x{1,2}|b{1,2}|♯{1,2}|♭{1,2})?(\d)?$/.exec(String(tok).trim());
   if(!m) return null;
   let letter = m[1].toUpperCase();
+  if(letter === 'H') letter = 'B';                       // H = B-naturlig
   let acc = 0;
   if(m[2]){
-    const sharps = m[2].includes('#') || m[2].includes('♯');
-    const n = m[2].length > 1 && (m[2][1] === m[2][0]) ? 2 : 1;
+    const s = m[2];
+    const sharps = s.includes('#') || s.includes('♯') || s.includes('x');
+    const n = (s.length > 1 && s[1] === s[0]) ? 2 : 1;   // doble fortegn: ##, bb, xx
     acc = sharps ? n : -n;
-  }
-  if(letter === 'B'){
-    // Norsk notasjon: B = Bb. "Bb" er samme tone; "B#" tilsvarer H# (= C).
-    acc = (m[2] && (m[2].includes('#') || m[2].includes('♯'))) ? 1 : -1;
-    letter = 'H';
   }
   const oct = (m[3] !== undefined) ? parseInt(m[3],10) : defOct;
   const midi = 12*(oct+1) + SEMI[letter] + acc;
-  let label = letter + (acc > 0 ? '#'.repeat(acc) : acc < 0 ? 'b'.repeat(-acc) : '') + oct;
-  if(letter === 'H' && acc === -1) label = 'B' + oct;         // vis B i stedet for Hb
-  if(letter === 'H' && acc === -2) label = 'Hbb' + oct;
+  const label = letter + (acc > 0 ? '#'.repeat(acc) : acc < 0 ? 'b'.repeat(-acc) : '') + oct;
   return {letter, acc, oct, midi, label};
 }
 function pcOf(tok){ const n = parseNote(tok, 4); return n ? ((n.midi % 12) + 12) % 12 : null; }
@@ -304,6 +294,33 @@ function currentKey(){ return activeList()[state.idx]; }
 let el = {};
 function $(id){ return document.getElementById(id); }
 
+/* Piano med navn på tastene; svarte tast viser doble navn (C♯/D♭ …) */
+const WHITE_KEYS = ['C','D','E','F','G','A','B'];
+const BLACK_KEYS = [
+  {sharp:'C#', flat:'Db', after:0}, {sharp:'D#', flat:'Eb', after:1},
+  {sharp:'F#', flat:'Gb', after:3}, {sharp:'G#', flat:'Ab', after:4}, {sharp:'A#', flat:'Bb', after:5}
+];
+function buildPiano(){
+  el.piano.innerHTML = '';
+  WHITE_KEYS.forEach(function(L){
+    const k = document.createElement('button');
+    k.type = 'button'; k.className = 'pkey';
+    k.innerHTML = '<span class="nm">' + L + '<small>' + state.oct + '</small></span>';
+    k.title = L + state.oct;
+    k.addEventListener('click', function(){ addToken(L + state.oct, true); });
+    el.piano.appendChild(k);
+  });
+  BLACK_KEYS.forEach(function(bk){
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'bkey';
+    b.style.left = 'calc(' + ((bk.after+1)/7*100) + '% - 4.5%)';
+    b.innerHTML = bk.sharp.replace('#','♯') + '/<br>' + bk.flat.replace('b','♭');
+    b.title = bk.sharp + ' = ' + bk.flat + ' — shift+klikk gir ' + bk.flat;
+    b.addEventListener('click', function(e){ addToken((e.shiftKey ? bk.flat : bk.sharp) + state.oct, true); });
+    el.piano.appendChild(b);
+  });
+}
+
 function init(){
   el = {
     prog: $('prog'), playAll: $('playAll'), card: $('card'),
@@ -311,7 +328,7 @@ function init(){
     staffWrap: $('staffWrap'), chips: $('chips'), feedback: $('feedback'),
     playBtn: $('playBtn'), arpBtn: $('arpBtn'), checkBtn: $('checkBtn'),
     answerBtn: $('answerBtn'), clearBtn: $('clearBtn'), nextBtn: $('nextBtn'),
-    octSeg: $('octSeg'), accSeg: $('accSeg'), notePad: $('notePad'),
+    octSeg: $('octSeg'), piano: $('piano'),
     noteInput: $('noteInput'), addBtn: $('addBtn'), progress: $('progress'), score: $('score')
   };
 
@@ -323,22 +340,13 @@ function init(){
   el.prog.value = state.prog;
 
   // noteknapper
-  LETTERS.forEach(function(L){
-    const b = document.createElement('button');
-    b.type = 'button'; b.textContent = L;
-    b.addEventListener('click', function(){ addToken(L + (state.accMode === 1 ? '#' : state.accMode === -1 ? 'b' : '') + state.oct, true); });
-    el.notePad.appendChild(b);
-  });
+  buildPiano();
 
   el.octSeg.addEventListener('click', function(e){
     const b = e.target.closest('button'); if(!b) return;
     state.oct = parseInt(b.dataset.oct, 10);
     [...el.octSeg.querySelectorAll('button')].forEach(x => x.classList.toggle('active', x === b));
-  });
-  el.accSeg.addEventListener('click', function(e){
-    const b = e.target.closest('button'); if(!b) return;
-    state.accMode = parseInt(b.dataset.acc, 10);
-    [...el.accSeg.querySelectorAll('button')].forEach(x => x.classList.toggle('active', x === b));
+    buildPiano();
   });
 
   el.prog.addEventListener('change', function(){ state.prog = el.prog.value; state.randomList = null; startOver(); });
@@ -355,7 +363,7 @@ function init(){
   document.addEventListener('keydown', function(e){
     if(e.target === el.noteInput || e.metaKey || e.ctrlKey || e.altKey) return;
     const k = e.key.toLowerCase();
-    if(LETTERS.map(x => x.toLowerCase()).includes(k)) addToken(k.toUpperCase() + state.oct, true);
+    if(LETTERS.map(x => x.toLowerCase()).includes(k) || k === 'h') addToken((k === 'h' ? 'B' : k.toUpperCase()) + state.oct, true);
   });
 
   // Lås opp lyden ved første klikk/tastetrykk (Safari krever brukerinteraksjon)
