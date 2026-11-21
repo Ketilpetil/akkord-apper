@@ -502,7 +502,7 @@ function renderProgress(){
   });
 }
 function renderStaff(){
-  const W = 380, H = 130, top = 28, gap = 10, bottom = top + 4*gap; // nederste linje = E4
+  const W = 380, H = 154, top = 28, gap = 10, bottom = top + 4*gap; // nederste linje = E4
   const color = state.solved ? '#16a34a' : '#111827';
   let s = '';
   for(let i = 0; i < 5; i++){
@@ -531,6 +531,8 @@ function renderStaff(){
     s += '<ellipse cx="' + cx + '" cy="' + cy + '" rx="6.5" ry="4.6" fill="' + color + '" transform="rotate(-18 ' + cx + ' ' + cy + ')"/>';
     if(stemUp) s += '<line x1="' + (cx+5.8) + '" y1="' + (cy-1) + '" x2="' + (cx+5.8) + '" y2="' + (cy-34) + '" stroke="' + color + '" stroke-width="1.6"/>';
     else       s += '<line x1="' + (cx-5.8) + '" y1="' + (cy+1) + '" x2="' + (cx-5.8) + '" y2="' + (cy+34) + '" stroke="' + color + '" stroke-width="1.6"/>';
+    // notnavn under notelinjen, rett under hver note
+    s += '<text x="' + cx + '" y="' + (H-8) + '" text-anchor="middle" font-size="12" font-weight="700" fill="' + color + '" font-family="sans-serif">' + n.label + '</text>';
     prevSteps = steps;
   });
   // Merk: vi setter innerHTML på en vanlig <div> (ikke direkte på <svg>),

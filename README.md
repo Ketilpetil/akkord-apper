@@ -28,6 +28,8 @@ Tips: I Chrome/Edge/Safari/Firefox, sjekk at adressefeltet viser `file:///...` �
 - Notene tegnes på en notelinje (SVG); riktig svar blir **grønt**
 - Flere akkordrekker i ulike tonearter (C-dur, G-dur, F-dur, A-moll, D-moll, 7-akkorder, blues) + tilfeldig rekke
 - v2: Tamagotchi med mat-meter, XP/level, streaks, gjenstandssamling – lagres i nettleseren (localStorage), også «mens du er borte»
+- v2: Notnavnene vises under notelinjen, rett under hver note
+- v2: Ved **level 10** blir tamagotchien **👑 LEGENDARY PER OTTAR 👑** (bilde i gullramme, `assets/per-ottar.jpg`)
 
 ## Teknologi
 

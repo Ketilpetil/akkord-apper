@@ -33,6 +33,10 @@
   @keyframes bounce{0%{transform:translateY(0) scale(1)}30%{transform:translateY(-16px) scale(1.05)}60%{transform:translateY(0) scale(.96)}100%{transform:translateY(0) scale(1)}}
   #nom{position:absolute;top:6px;left:50%;transform:translateX(-50%);font-weight:800;color:var(--good);opacity:0;pointer-events:none;font-size:1.2rem}
   #nom.show{animation:nompop 1s ease}
+  .legendary{border:4px solid #fbbf24;border-radius:16px;padding:8px;background:radial-gradient(circle at 50% 15%,#fef3c7,#fde68a);box-shadow:0 0 24px rgba(251,191,36,.8);text-align:center;animation:legendGlow 1.6s ease-in-out infinite;max-width:200px;margin:0 auto}
+  @keyframes legendGlow{0%,100%{box-shadow:0 0 14px rgba(251,191,36,.55)}50%{box-shadow:0 0 36px rgba(251,191,36,1)}}
+  .legendary img{width:168px;height:168px;object-fit:cover;border-radius:12px;display:block;margin:0 auto;border:2px solid #fff}
+  .legendary .tag{font-weight:800;color:#92400e;font-size:.82rem;margin-top:6px;letter-spacing:.4px}
   @keyframes nompop{0%{opacity:0;transform:translate(-50%,10px) scale(.6)}20%{opacity:1;transform:translate(-50%,0) scale(1.15)}70%{opacity:1}100%{opacity:0;transform:translate(-50%,-14px) scale(1)}}
   #petName{width:100%;text-align:center;font-weight:800;font-size:1.05rem;border:none;background:transparent;color:var(--accent2);margin-bottom:6px}
   #petName:focus{outline:2px solid var(--line);border-radius:8px;background:#fff}
@@ -225,6 +229,7 @@ const ITEMS = {
   scarf:   {emo:'🧣', name:'Skjerf',     slot:'hals',   need:{level:5}},
   crown:   {emo:'👑', name:'Kron',       slot:'hode',   need:{level:8}}
 };
+const LEGENDARY_LEVEL = 10;   // øverste nivå: LEGENDARY PER OTTAR
 
 /* ================= Noter ================= */
 function parseNote(tok, defOct){
@@ -454,15 +459,22 @@ function petSVG(){
     + '</svg>';
 }
 function renderPet(){
-  el.petSvg.innerHTML = petSVG();
+  if(game.level >= LEGENDARY_LEVEL){
+    // Øverste nivå: LEGENDARY PER OTTAR (bilde i gullramme; faller tilbake til SVG-figur hvis bildet mangler)
+    el.petSvg.innerHTML = '<div class="legendary"><img src="assets/per-ottar.jpg" alt="LEGENDARY PER OTTAR" '
+      + 'onerror="this.closest(\'.legendary\').outerHTML=\'<svg viewBox=\\\'0 0 200 210\\\'>\' + petSVG().replace(/^<svg[^>]*>|<\\/svg>$/g,\'\') + \'</svg>\'">'
+      + '<div class="tag">👑 LEGENDARY PER OTTAR 👑</div></div>';
+  } else {
+    el.petSvg.innerHTML = petSVG();
+  }
   el.petName.value = game.name;
   const h = Math.round(game.hunger);
   el.hungerFill.style.width = h + '%';
   el.hungerFill.classList.toggle('low', h < 30);
   el.hungerVal.textContent = h + '%';
   const need = xpNeeded(game.level);
-  el.xpFill.style.width = Math.min(100, Math.round(game.xp/need*100)) + '%';
-  el.xpVal.textContent = game.xp + '/' + need + ' XP';
+  el.xpFill.style.width = game.level >= LEGENDARY_LEVEL ? '100%' : Math.min(100, Math.round(game.xp/need*100)) + '%';
+  el.xpVal.textContent = game.level >= LEGENDARY_LEVEL ? 'MAX 👑' : game.xp + '/' + need + ' XP';
   el.levelVal.textContent = game.level;
   el.streakVal.textContent = game.streak;
   el.bestVal.textContent = game.bestStreak;
@@ -537,8 +549,11 @@ function onCorrect(){
   const firstTry = game.attempts === 1;
   game.xp += 10 + (firstTry ? 5 : 0) + Math.min(game.streak, 5) * 2;
   let leveled = false;
-  while(game.xp >= xpNeeded(game.level)){ game.xp -= xpNeeded(game.level); game.level++; leveled = true; }
-  if(leveled){ jingleLevel(); toast('🎉 Level ' + game.level + '!'); }
+  while(game.level < LEGENDARY_LEVEL && game.xp >= xpNeeded(game.level)){ game.xp -= xpNeeded(game.level); game.level++; leveled = true; }
+  if(leveled){
+    jingleLevel();
+    toast(game.level >= LEGENDARY_LEVEL ? '👑👑 LEGENDARY! Tamagotchien er nå PER OTTAR! 👑👑' : '🎉 Level ' + game.level + '!');
+  }
   // lås opp gjenstander
   Object.entries(ITEMS).forEach(function(pair){
     const id = pair[0], it = pair[1];
@@ -680,7 +695,7 @@ function renderProgress(){
   });
 }
 function renderStaff(){
-  const W=380,H=130,top=28,gap=10,bottom=top+4*gap;
+  const W=380,H=154,top=28,gap=10,bottom=top+4*gap;
   const color = game.solved ? '#16a34a' : '#111827';
   let s='';
   for(let i=0;i<5;i++){ const y=top+i*gap; s+='<line x1="10" y1="'+y+'" x2="'+(W-10)+'" y2="'+y+'" stroke="#94a3b8" stroke-width="1.2"/>'; }
@@ -701,6 +716,8 @@ function renderStaff(){
     s+='<ellipse cx="'+cx+'" cy="'+cy+'" rx="6.5" ry="4.6" fill="'+color+'" transform="rotate(-18 '+cx+' '+cy+')"/>';
     if(stemUp) s+='<line x1="'+(cx+5.8)+'" y1="'+(cy-1)+'" x2="'+(cx+5.8)+'" y2="'+(cy-34)+'" stroke="'+color+'" stroke-width="1.6"/>';
     else s+='<line x1="'+(cx-5.8)+'" y1="'+(cy+1)+'" x2="'+(cx-5.8)+'" y2="'+(cy+34)+'" stroke="'+color+'" stroke-width="1.6"/>';
+    // notnavn under notelinjen, rett under hver note
+    s+='<text x="'+cx+'" y="'+(H-8)+'" text-anchor="middle" font-size="12" font-weight="700" fill="'+color+'" font-family="sans-serif">'+n.label+'</text>';
     prev=steps;
   });
   el.staffWrap.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">'+s+'</svg>';
