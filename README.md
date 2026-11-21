@@ -30,7 +30,7 @@ Tips: I Chrome/Edge/Safari/Firefox, sjekk at adressefeltet viser `file:///...` �
 - Flere akkordrekker i ulike tonearter (C-dur, G-dur, F-dur, A-moll, D-moll, 7-akkorder, blues, **inversjoner/slasj-akkorder**) + tilfeldig rekke
 - **Slasj-akkorder** (f.eks. `G/B`, `C/E`): hint sier hvilken basstone som må ligge nederst, og svaret må ha basstonen lavest (spilles også én oktav ned)
 - **Piano med to oktaver** (C4–B5 som standard)
-- Notene vises på **grand staff**: g-nøkkel over C4, f-nøkkel under – med notnavn under hver note
+- Notene vises på **notelinje i g-nøkkel** (hjelpelinjer under ved lave noter) – med notnavn under hver note
 - v2: Tamagotchi med mat-meter, XP/level, streaks, gjenstandssamling – lagres i nettleseren (localStorage), også «mens du er borte»
 - v2: **13 gjenstander i to temaer** – 🌈 rainbow unicorn (enhjørning-horn, regnbue-manke, stjernestøv) og 🤘 black metal (corpsepaint, piggkrage, kjede, pentagram) – låses opp ved streaks/level, og du kan **ha på så mange du vil samtidig** (klikk for å ta av/på)
 - v2: Notnavnene vises under notelinjen, rett under hver note

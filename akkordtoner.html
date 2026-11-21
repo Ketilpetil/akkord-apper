@@ -549,46 +549,32 @@ function renderProgress(){
 }
 function renderStaff(){
   const W=380, gap=9, top=22;
-  const tBottom=top+4*gap;                    // g-nøkkel: nederste linje = E4
-  const bTop=tBottom+30, bBottom=bTop+4*gap;  // f-nøkkel: nederste linje = G2
-  const H=bBottom+28;
+  const bottom=top+4*gap;                 // g-nøkkel: nederste linje = E4
+  const notes=state.entered.map(e=>e.note);
+  let minSteps=0;
+  notes.forEach(function(n){ const st=n.oct*7+LETTERS.indexOf(n.letter)-30; if(st<minSteps) minSteps=st; });
+  const H=bottom + Math.max(30, (-minSteps)*gap/2 + 46);
   const color = state.solved ? '#16a34a' : '#111827';
   let s='';
-  s+='<path d="M15 '+top+' q-7 '+((bBottom-top)/2)+' 0 '+(bBottom-top)+'" stroke="#111827" fill="none" stroke-width="2"/>';
-  for(let i=0;i<5;i++){
-    s+='<line x1="18" y1="'+(top+i*gap)+'" x2="'+(W-10)+'" y2="'+(top+i*gap)+'" stroke="#94a3b8" stroke-width="1.2"/>';
-    s+='<line x1="18" y1="'+(bTop+i*gap)+'" x2="'+(W-10)+'" y2="'+(bTop+i*gap)+'" stroke="#94a3b8" stroke-width="1.2"/>';
-  }
-  s+='<text x="20" y="'+(tBottom+7)+'" font-size="42" font-family="Georgia,\'Apple Symbols\',\'Segoe UI Symbol\',serif" fill="#111827">𝄞</text>';
-  const F=bTop+gap;   // F-linjen i f-nøkkelen
-  s+='<g fill="#111827" stroke="#111827">'
-  + '<circle cx="27" cy="'+F+'" r="3.4" stroke="none"/>'
-  + '<path d="M27 '+F+' C 40 '+(F-11)+', 45 '+(F-1)+', 41 '+(F+9)+' C 37 '+(F+19)+', 27 '+(F+21)+', 20 '+(F+15)+' C 15 '+(F+10)+', 17 '+(F+3)+', 24 '+(F+2)+'" fill="none" stroke-width="3" stroke-linecap="round"/>'
-  + '<circle cx="47" cy="'+(F-4.5)+'" r="2.2" stroke="none"/>'
-  + '<circle cx="47" cy="'+(F+4.5)+'" r="2.2" stroke="none"/>'
-  + '</g>';
-  const notes=state.entered.map(e=>e.note);
+  for(let i=0;i<5;i++){ const y=top+i*gap; s+='<line x1="18" y1="'+y+'" x2="'+(W-10)+'" y2="'+y+'" stroke="#94a3b8" stroke-width="1.2"/>'; }
+  s+='<text x="20" y="'+(bottom+7)+'" font-size="42" font-family="Georgia,\'Apple Symbols\',\'Segoe UI Symbol\',serif" fill="#111827">\u{1D11E}</text>';
   if(!notes.length){
-    s+='<text x="'+(W/2)+'" y="'+((tBottom+bTop)/2)+'" text-anchor="middle" font-size="13" fill="#9ca3af" font-family="sans-serif">notene du skriver inn vises her – g-nøkkel over, f-nøkkel under…</text>';
+    s+='<text x="'+(W/2)+'" y="'+(bottom+18)+'" text-anchor="middle" font-size="13" fill="#9ca3af" font-family="sans-serif">notene du skriver inn vises her\u2026</text>';
   }
-  let prev=null, prevTreble=null;
+  let prev=null;
   notes.forEach(function(n,i){
-    const d=n.oct*7+LETTERS.indexOf(n.letter);
-    const treble=n.midi>=60;                  // C4 og oppover i g-nøkkel
-    const bottom=treble?tBottom:bBottom;
-    const base=treble?30:18;                  // E4=30, G2=18
-    const steps=d-base;
+    const steps=n.oct*7+LETTERS.indexOf(n.letter)-30;   // antall steg over E4
     let cx=64+i*32, cy=bottom-steps*gap/2, second=false;
-    if(prev!==null && prevTreble===treble && Math.abs(steps-prev)===1){ cx-=13; second=true; }
+    if(prev!==null && Math.abs(steps-prev)===1){ cx-=13; second=true; }
     if(steps<0){ for(let L=-2;L>=steps;L-=2){ const y=bottom-L*gap/2; s+='<line x1="'+(cx-10)+'" y1="'+y+'" x2="'+(cx+10)+'" y2="'+y+'" stroke="#111827" stroke-width="1.2"/>'; } }
     if(steps>8){ for(let L=10;L<=steps;L+=2){ const y=bottom-L*gap/2; s+='<line x1="'+(cx-10)+'" y1="'+y+'" x2="'+(cx+10)+'" y2="'+y+'" stroke="#111827" stroke-width="1.2"/>'; } }
-    if(n.acc!==0) s+='<text x="'+(cx-19)+'" y="'+(cy+5)+'" font-size="16" font-weight="bold" fill="'+color+'" font-family="sans-serif">'+(n.acc>0?'♯':'♭')+'</text>';
+    if(n.acc!==0) s+='<text x="'+(cx-19)+'" y="'+(cy+5)+'" font-size="16" font-weight="bold" fill="'+color+'" font-family="sans-serif">'+(n.acc>0?'\u266F':'\u266D')+'</text>';
     const stemUp = second ? false : steps<4;
     s+='<ellipse cx="'+cx+'" cy="'+cy+'" rx="6.2" ry="4.4" fill="'+color+'" transform="rotate(-18 '+cx+' '+cy+')"/>';
     if(stemUp) s+='<line x1="'+(cx+5.5)+'" y1="'+(cy-1)+'" x2="'+(cx+5.5)+'" y2="'+(cy-32)+'" stroke="'+color+'" stroke-width="1.5"/>';
     else s+='<line x1="'+(cx-5.5)+'" y1="'+(cy+1)+'" x2="'+(cx-5.5)+'" y2="'+(cy+32)+'" stroke="'+color+'" stroke-width="1.5"/>';
-    s+='<text x="'+cx+'" y="'+(bottom+15)+'" text-anchor="middle" font-size="11" font-weight="700" fill="'+color+'" font-family="sans-serif">'+spellFor(n)+'</text>';
-    prev=steps; prevTreble=treble;
+    s+='<text x="'+cx+'" y="'+(H-8)+'" text-anchor="middle" font-size="11" font-weight="700" fill="'+color+'" font-family="sans-serif">'+spellFor(n)+'</text>';
+    prev=steps;
   });
   el.staffWrap.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">'+s+'</svg>';
 }
