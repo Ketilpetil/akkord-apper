@@ -159,7 +159,7 @@
 
     <div>
       <span class="seg" id="octSeg"><button type="button" data-oct="3">3</button><button type="button" data-oct="4" class="active">4</button><button type="button" data-oct="5">5</button></span>
-      <span style="font-size:.85rem;color:var(--muted)">velg oktave, klikk på pianoet:</span>
+      <span style="font-size:.85rem;color:var(--muted)">velg oktav, klikk på pianoet:</span>
     </div>
     <div class="piano" id="piano"></div>
     <div class="textrow">
@@ -385,7 +385,7 @@ const BLACK_KEYS = [
 ];
 function buildPiano(){
   el.piano.innerHTML = '';
-  const octs = [game.oct, game.oct+1];          // to oktaver på pianoet
+  const octs = [game.oct, game.oct+1];          // to oktavr på pianoet
   octs.forEach(function(oct){
     WHITE_KEYS.forEach(function(L){
       const k = document.createElement('button');
@@ -483,7 +483,14 @@ const ACC_SVG = {
   bowtie: '<polygon points="100,168 78,158 78,178" fill="#dc2626"/><polygon points="100,168 122,158 122,178" fill="#dc2626"/><circle cx="100" cy="168" r="6" fill="#b91c1c"/>',
   scarf: '<rect x="58" y="150" width="84" height="20" rx="10" fill="#0ea5e9"/><rect x="112" y="166" width="20" height="30" rx="8" fill="#0284c7"/>',
   horn: '<polygon points="100,14 91,54 109,54" fill="#fde68a" stroke="#d97706" stroke-width="2"/><path d="M95 46 q5 -4 10 0 M93 38 q7 -5 14 0 M96 30 q4 -3 8 0" stroke="#d97706" stroke-width="1.6" fill="none"/>',
-  rainbow: '<g fill="none" stroke-width="5" stroke-linecap="round"><path d="M44 122 a60 60 0 0 1 6 -56" stroke="#ef4444"/><path d="M38 124 a66 66 0 0 1 7 -62" stroke="#f97316"/><path d="M32 126 a72 72 0 0 1 8 -68" stroke="#eab308"/><path d="M26 128 a78 78 0 0 1 9 -74" stroke="#22c55e"/><path d="M20 130 a84 84 0 0 1 10 -80" stroke="#3b82f6"/><path d="M14 132 a90 90 0 0 1 11 -86" stroke="#8b5cf6"/></g>',
+  rainbow: '<g fill="none" stroke-width="5" stroke-linecap="round">'
+    + '<path d="M34 94 A70 70 0 0 1 166 94" stroke="#ef4444"/>'
+    + '<path d="M29 92 A76 76 0 0 1 171 92" stroke="#f97316"/>'
+    + '<path d="M23 90 A82 82 0 0 1 177 90" stroke="#eab308"/>'
+    + '<path d="M18 88 A88 88 0 0 1 182 88" stroke="#22c55e"/>'
+    + '<path d="M12 86 A94 94 0 0 1 188 86" stroke="#3b82f6"/>'
+    + '<path d="M6 84 A100 100 0 0 1 194 84" stroke="#8b5cf6"/>'
+    + '</g>',
   sparkle: '<g fill="#fbbf24"><path d="M45 52 l3 7 7 3 -7 3 -3 7 -3 -7 -7 -3 7 -3 z"/><path d="M158 46 l2.5 6 6 2.5 -6 2.5 -2.5 6 -2.5 -6 -6 -2.5 6 -2.5 z"/><path d="M58 22 l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2 z"/><path d="M146 20 l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2 z"/></g>',
   paint: '<ellipse cx="100" cy="95" rx="42" ry="29" fill="#f1f5f9"/><circle cx="78" cy="92" r="13" fill="#111827"/><circle cx="122" cy="92" r="13" fill="#111827"/><circle cx="78" cy="92" r="6" fill="#fff"/><circle cx="122" cy="92" r="6" fill="#fff"/><circle cx="78" cy="92" r="3" fill="#111827"/><circle cx="122" cy="92" r="3" fill="#111827"/><path d="M88 116 q12 6 24 0" stroke="#111827" stroke-width="2.4" fill="none" stroke-linecap="round"/>',
   spikes: '<g fill="#d1d5db" stroke="#6b7280" stroke-width="1"><polygon points="58,160 63,146 68,160"/><polygon points="70,162 75,148 80,162"/><polygon points="82,163 87,149 92,163"/><polygon points="94,164 99,150 104,164"/><polygon points="106,163 111,149 116,163"/><polygon points="118,162 123,148 128,162"/><polygon points="130,160 135,146 140,160"/></g>',
