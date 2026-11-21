@@ -143,7 +143,7 @@
       <div class="stat small">Level <b id="levelVal"></b> · 🔥 streak <b id="streakVal"></b> (beste <b id="bestVal"></b>) · ✅ <b id="okVal"></b> · ❌ <b id="badVal"></b></div>
       <h3>🎒 Samling <span style="font-weight:400;color:var(--muted);font-size:.75rem">(klikk for å ta på)</span></h3>
       <div id="collection"></div>
-      <p class="hint">Tamagotchien blir sulten med tiden (og av feilsvar!). Riktig svar = 🍔 mat + XP. Ved streak 3/5/8 og level 3/5/8 vinner du gjenstander. Sulter den ihjel, dør den… 💀</p>
+      <p class="hint">Tamagotchien blir sulten med tiden (og av feilsvar!). Riktig svar = 🍔 mat + XP. Ved streaks og level vinner du gjenstander – klikk for å ta på/av så mange du vil! Sulter den ihjel, dør den… 💀</p>
     </aside>
 
     <section class="card" id="card">
@@ -237,12 +237,19 @@ const RANDOM_KEY = '🎲 Tilfeldig rekke';
 
 /* ================= Gjenstander ================= */
 const ITEMS = {
-  bowtie:  {emo:'🎀', name:'Sløyfe',     slot:'hals',   need:{streak:3}},
-  glasses: {emo:'🕶️', name:'Solbriller', slot:'ansikt', need:{streak:5}},
-  hat:     {emo:'🎩', name:'Hatt',       slot:'hode',   need:{streak:8}},
-  flower:  {emo:'🌸', name:'Blomst',     slot:'hode',   need:{level:3}},
-  scarf:   {emo:'🧣', name:'Skjerf',     slot:'hals',   need:{level:5}},
-  crown:   {emo:'👑', name:'Kron',       slot:'hode',   need:{level:8}}
+  bowtie:  {emo:'🎀', name:'Sløyfe',           need:{streak:3}},
+  glasses: {emo:'🕶️', name:'Solbriller',       need:{streak:5}},
+  rainbow: {emo:'🌈', name:'Regnbue-manke',    need:{streak:6}, behind:true},   // rainbow unicorn-tema
+  hat:     {emo:'🎩', name:'Hatt',             need:{streak:8}},
+  spikes:  {emo:'📌', name:'Piggkrage',        need:{streak:7}},                      // black metal-tema
+  pent:    {emo:'⛧',  name:'Pentagram',        need:{streak:10}},
+  flower:  {emo:'🌸', name:'Blomst',           need:{level:3}},
+  horn:    {emo:'🦄', name:'Enhjørning-horn',  need:{level:4}, behind:false},       // rainbow unicorn-tema
+  scarf:   {emo:'🧣', name:'Skjerf',           need:{level:5}},
+  sparkle: {emo:'✨', name:'Stjernestøv',      need:{level:6}, behind:true},         // rainbow unicorn-tema
+  paint:   {emo:'💀', name:'Corpsepaint',      need:{level:7}},                      // black metal-tema
+  crown:   {emo:'👑', name:'Krone',            need:{level:8}},
+  chain:   {emo:'⛓️', name:'Kjede',            need:{level:9}}                       // black metal-tema
 };
 const LEGENDARY_LEVEL = 10;   // øverste nivå: LEGENDARY PER OTTAR
 
@@ -327,7 +334,7 @@ function jingleDeath(){ playTones([55],.5,false); setTimeout(function(){ playTon
 const SAVE_KEY = 'akkordtama_v2';
 const DEF = {
   name:'Bob', hunger:80, xp:0, level:1, streak:0, bestStreak:0,
-  items:[], equipped:{}, alive:true, totalCorrect:0, totalWrong:0,
+  items:[], wearing:[], alive:true, totalCorrect:0, totalWrong:0,
   lastSeen:Date.now(), prog:Object.keys(PROGRESSIONS)[0], idx:0,
   entered:[], attempts:0, solved:false, oct:4, accMode:0, randomList:null, finished:false
 };
@@ -356,6 +363,7 @@ function load(){
     if(!raw) return;
     const d = JSON.parse(raw);
     Object.assign(game, DEF, d);
+    if(d.equipped && !d.wearing){ game.wearing = Object.values(d.equipped).filter(Boolean); }
     // tamagotchien blir sulten mens du er borte 🙂
     if(game.alive && d.lastSeen){
       const awaySec = (Date.now()-d.lastSeen)/1000;
@@ -473,7 +481,14 @@ const ACC_SVG = {
   flower: '<g fill="#f472b6"><circle cx="138" cy="50" r="7"/><circle cx="149" cy="58" r="7"/><circle cx="145" cy="71" r="7"/><circle cx="131" cy="71" r="7"/><circle cx="127" cy="58" r="7"/></g><circle cx="138" cy="61" r="5.5" fill="#fbbf24"/>',
   glasses: '<g stroke="#111827" stroke-width="3" fill="rgba(125,211,252,.45)"><circle cx="78" cy="95" r="16"/><circle cx="122" cy="95" r="16"/><line x1="94" y1="95" x2="106" y2="95"/><line x1="62" y1="92" x2="34" y2="87"/><line x1="138" y1="92" x2="166" y2="87"/></g>',
   bowtie: '<polygon points="100,168 78,158 78,178" fill="#dc2626"/><polygon points="100,168 122,158 122,178" fill="#dc2626"/><circle cx="100" cy="168" r="6" fill="#b91c1c"/>',
-  scarf: '<rect x="58" y="150" width="84" height="20" rx="10" fill="#0ea5e9"/><rect x="112" y="166" width="20" height="30" rx="8" fill="#0284c7"/>'
+  scarf: '<rect x="58" y="150" width="84" height="20" rx="10" fill="#0ea5e9"/><rect x="112" y="166" width="20" height="30" rx="8" fill="#0284c7"/>',
+  horn: '<polygon points="100,14 91,54 109,54" fill="#fde68a" stroke="#d97706" stroke-width="2"/><path d="M95 46 q5 -4 10 0 M93 38 q7 -5 14 0 M96 30 q4 -3 8 0" stroke="#d97706" stroke-width="1.6" fill="none"/>',
+  rainbow: '<g fill="none" stroke-width="5" stroke-linecap="round"><path d="M44 122 a60 60 0 0 1 6 -56" stroke="#ef4444"/><path d="M38 124 a66 66 0 0 1 7 -62" stroke="#f97316"/><path d="M32 126 a72 72 0 0 1 8 -68" stroke="#eab308"/><path d="M26 128 a78 78 0 0 1 9 -74" stroke="#22c55e"/><path d="M20 130 a84 84 0 0 1 10 -80" stroke="#3b82f6"/><path d="M14 132 a90 90 0 0 1 11 -86" stroke="#8b5cf6"/></g>',
+  sparkle: '<g fill="#fbbf24"><path d="M45 52 l3 7 7 3 -7 3 -3 7 -3 -7 -7 -3 7 -3 z"/><path d="M158 46 l2.5 6 6 2.5 -6 2.5 -2.5 6 -2.5 -6 -6 -2.5 6 -2.5 z"/><path d="M58 22 l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2 z"/><path d="M146 20 l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2 z"/></g>',
+  paint: '<ellipse cx="100" cy="95" rx="42" ry="29" fill="#f1f5f9"/><circle cx="78" cy="92" r="13" fill="#111827"/><circle cx="122" cy="92" r="13" fill="#111827"/><circle cx="78" cy="92" r="6" fill="#fff"/><circle cx="122" cy="92" r="6" fill="#fff"/><circle cx="78" cy="92" r="3" fill="#111827"/><circle cx="122" cy="92" r="3" fill="#111827"/><path d="M88 116 q12 6 24 0" stroke="#111827" stroke-width="2.4" fill="none" stroke-linecap="round"/>',
+  spikes: '<g fill="#d1d5db" stroke="#6b7280" stroke-width="1"><polygon points="58,160 63,146 68,160"/><polygon points="70,162 75,148 80,162"/><polygon points="82,163 87,149 92,163"/><polygon points="94,164 99,150 104,164"/><polygon points="106,163 111,149 116,163"/><polygon points="118,162 123,148 128,162"/><polygon points="130,160 135,146 140,160"/></g>',
+  chain: '<path d="M60 148 Q100 174 140 148" fill="none" stroke="#9ca3af" stroke-width="3.4" stroke-dasharray="5 3.4" stroke-linecap="round"/>',
+  pent: '<g stroke="#111827" stroke-width="1.6" fill="none"><circle cx="100" cy="168" r="11"/><polygon points="100,159 102.7,165.6 109.6,166 104.2,170.5 106.2,177.4 100,173.4 93.8,177.4 95.8,170.5 90.4,166 97.3,165.6"/></g>'
 };
 function petSVG(){
   const h = game.hunger, dead = !game.alive;
@@ -499,10 +514,16 @@ function petSVG(){
     if(h<15) extra += '<path d="M148 62 q7 11 0 16 q-7 -5 0 -16" fill="#7dd3fc"/>';
   }
   const blush = (!dead && h>=30) ? '<circle cx="60" cy="118" r="8" fill="rgba(244,114,182,.5)"/><circle cx="140" cy="118" r="8" fill="rgba(244,114,182,.5)"/>' : '';
-  let acc = '';
-  Object.values(game.equipped).forEach(function(id){ if(ACC_SVG[id]) acc += '<g>' + ACC_SVG[id] + '</g>'; });
+  let accBehind = '', acc = '';
+  game.wearing.forEach(function(id){
+    const svg = ACC_SVG[id];
+    if(!svg) return;
+    if(ITEMS[id] && ITEMS[id].behind) accBehind += '<g>' + svg + '</g>';
+    else acc += '<g>' + svg + '</g>';
+  });
   return '<svg viewBox="0 0 200 210" xmlns="http://www.w3.org/2000/svg">'
     + '<ellipse cx="100" cy="196" rx="55" ry="9" fill="rgba(0,0,0,.12)"/>'
+    + accBehind
     + '<ellipse cx="100" cy="118" rx="68" ry="62" fill="' + body + '"/>'
     + '<ellipse cx="100" cy="142" rx="38" ry="26" fill="rgba(255,255,255,.22)"/>'
     + blush + eyes + extra + mouth + acc
@@ -538,15 +559,16 @@ function renderCollection(){
   Object.entries(ITEMS).forEach(function(pair){
     const id = pair[0], it = pair[1];
     const owned = game.items.includes(id);
-    const equipped = game.equipped[it.slot] === id;
+    const on = game.wearing.includes(id);
     const d = document.createElement('button');
     d.type = 'button';
-    d.className = 'item' + (owned ? '' : ' locked') + (equipped ? ' equipped' : '');
+    d.className = 'item' + (owned ? '' : ' locked') + (on ? ' equipped' : '');
     d.innerHTML = '<span class="emo">' + (owned ? it.emo : '🔒') + '</span>' + (owned ? it.name : 'Lås opp: ' + unlockText(it));
     if(owned){
       d.addEventListener('click', function(){
-        game.equipped[it.slot] = (game.equipped[it.slot] === id) ? null : id;
-        save(); renderPet(); toast(equipped ? it.name + ' tatt av' : it.emo + ' ' + it.name + ' tatt på!');
+        const i = game.wearing.indexOf(id);
+        if(i >= 0) game.wearing.splice(i, 1); else game.wearing.push(id);   // fritt valg: av/på, så mange du vil
+        save(); renderPet(); toast(on ? it.name + ' tatt av' : it.emo + ' ' + it.name + ' tatt på!');
       });
     }
     el.collection.appendChild(d);
@@ -579,9 +601,9 @@ function die(){
   jingleDeath(); save(); renderAll(); showDeath();
 }
 function restart(){
-  const keepItems = game.items.slice(), keepEquipped = Object.assign({}, game.equipped);
+  const keepItems = game.items.slice(), keepWearing = game.wearing.slice();
   Object.assign(game, DEF, {
-    items: keepItems, equipped: keepEquipped,
+    items: keepItems, wearing: keepWearing,
     prog: game.prog, name: game.name,
     entered: [], attempts: 0, solved: false, randomList: null, finished: false, idx: 0
   });
@@ -609,7 +631,7 @@ function onCorrect(){
     const ok = (it.need.streak && game.bestStreak >= it.need.streak) || (it.need.level && game.level >= it.need.level);
     if(ok){
       game.items.push(id);
-      game.equipped[it.slot] = id;
+      game.wearing.push(id);
       newItems.push(id);
     }
   });

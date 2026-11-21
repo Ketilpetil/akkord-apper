@@ -32,6 +32,7 @@ Tips: I Chrome/Edge/Safari/Firefox, sjekk at adressefeltet viser `file:///...` �
 - **Piano med to oktaver** (C4–B5 som standard)
 - Notene vises på **grand staff**: g-nøkkel over C4, f-nøkkel under – med notnavn under hver note
 - v2: Tamagotchi med mat-meter, XP/level, streaks, gjenstandssamling – lagres i nettleseren (localStorage), også «mens du er borte»
+- v2: **13 gjenstander i to temaer** – 🌈 rainbow unicorn (enhjørning-horn, regnbue-manke, stjernestøv) og 🤘 black metal (corpsepaint, piggkrage, kjede, pentagram) – låses opp ved streaks/level, og du kan **ha på så mange du vil samtidig** (klikk for å ta av/på)
 - v2: Notnavnene vises under notelinjen, rett under hver note
 - v2: Ved **level 10** blir tamagotchien **👑 LEGENDARY PER OTTAR 👑** (bilde i gullramme, `assets/per-ottar.jpg`)
 
