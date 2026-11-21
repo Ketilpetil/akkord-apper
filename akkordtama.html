@@ -84,6 +84,8 @@
   .btn-next{background:var(--good);color:#fff;display:none}
   .card.correct .btn-next{display:inline-block}
 
+  .inline-input{margin-top:12px;border-top:1px dashed var(--line);padding-top:12px}
+  .card .piano{max-width:100%}
   .pad{margin-top:16px;background:var(--card);border-radius:18px;padding:18px;box-shadow:0 6px 24px rgba(30,27,75,.08)}
   .pad h2{margin:0 0 10px;font-size:1.05rem}
   .seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-right:10px;vertical-align:middle}
@@ -152,6 +154,20 @@
       <div class="chord-answer" id="chordAnswer"></div>
       <div id="staffWrap" role="img" aria-label="Notelinje"></div>
       <div id="chips"></div>
+      <div class="inline-input">
+        <h2 style="margin:0 0 8px;font-size:1rem">Skriv inn toner 👇</h2>
+
+    <div>
+      <span class="seg" id="octSeg"><button type="button" data-oct="3">3</button><button type="button" data-oct="4" class="active">4</button><button type="button" data-oct="5">5</button></span>
+      <span style="font-size:.85rem;color:var(--muted)">velg oktave, klikk på pianoet:</span>
+    </div>
+    <div class="piano" id="piano"></div>
+    <div class="textrow">
+      <input type="text" id="noteInput" placeholder="eller skriv f.eks. «c e g» og trykk Enter">
+      <button id="addBtn" class="btn-primary" type="button">Legg til</button>
+    </div>
+    <p class="help">Klikk på <b>pianotastene</b> (svarte tast har <b>doble navn</b>: C♯/D♭, D♯/E♭, F♯/G♭, G♯/A♭, A♯/B♭ – <kbd>shift</kbd>+klikk gir b-versjonen), skriv i feltet (f.eks. «c e g»), eller bruk tastaturet (<kbd>c</kbd> <kbd>d</kbd> <kbd>e</kbd> <kbd>f</kbd> <kbd>g</kbd> <kbd>a</kbd> <kbd>b</kbd>). Notasjon: <b>B</b> = B-naturlig (<kbd>h</kbd> virker også), <b>Bb</b> skrives <i>bb</i>. Kryss: <kbd>#</kbd> etter bokstaven (f.eks. <i>f#</i>), dobbeltkryss: <i>##</i> eller <i>x</i>. B: <kbd>b</kbd> etter bokstaven (f.eks. <i>eb</i> = E♭, <i>dbb</i> = D dobbelt-b). Oktave 4 er standard.</p>
+      </div>
       <div id="feedback"></div>
       <div class="actions">
         <button id="playBtn" class="btn-primary" type="button">🔊 Spill det jeg har skrevet</button>
@@ -164,19 +180,6 @@
     </section>
   </div>
 
-  <section class="pad">
-    <h2>Skriv inn toner</h2>
-    <div>
-      <span class="seg" id="octSeg"><button type="button" data-oct="3">3</button><button type="button" data-oct="4" class="active">4</button><button type="button" data-oct="5">5</button></span>
-      <span style="font-size:.85rem;color:var(--muted)">velg oktave, klikk på pianoet:</span>
-    </div>
-    <div class="piano" id="piano"></div>
-    <div class="textrow">
-      <input type="text" id="noteInput" placeholder="eller skriv f.eks. «c e g» og trykk Enter">
-      <button id="addBtn" class="btn-primary" type="button">Legg til</button>
-    </div>
-    <p class="help">Klikk på <b>pianotastene</b> (svarte tast har <b>doble navn</b>: C♯/D♭, D♯/E♭, F♯/G♭, G♯/A♭, A♯/B♭ – <kbd>shift</kbd>+klikk gir b-versjonen), skriv i feltet (f.eks. «c e g»), eller bruk tastaturet (<kbd>c</kbd> <kbd>d</kbd> <kbd>e</kbd> <kbd>f</kbd> <kbd>g</kbd> <kbd>a</kbd> <kbd>b</kbd>). Notasjon: <b>B</b> = B-naturlig (<kbd>h</kbd> virker også), <b>Bb</b> skrives <i>bb</i>. Kryss: <kbd>#</kbd> etter bokstaven (f.eks. <i>f#</i>), dobbeltkryss: <i>##</i> eller <i>x</i>. B: <kbd>b</kbd> etter bokstaven (f.eks. <i>eb</i> = E♭, <i>dbb</i> = D dobbelt-b). Oktave 4 er standard.</p>
-  </section>
 
   <div class="progress" id="progress"></div>
 </main>
