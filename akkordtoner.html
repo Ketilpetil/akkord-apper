@@ -560,7 +560,13 @@ function renderStaff(){
     s+='<line x1="18" y1="'+(bTop+i*gap)+'" x2="'+(W-10)+'" y2="'+(bTop+i*gap)+'" stroke="#94a3b8" stroke-width="1.2"/>';
   }
   s+='<text x="20" y="'+(tBottom+7)+'" font-size="42" font-family="Georgia,\'Apple Symbols\',\'Segoe UI Symbol\',serif" fill="#111827">𝄞</text>';
-  s+='<g stroke="#111827" fill="#111827"><path d="M31 '+(bTop+1)+' c7 1 9 6 7 12 c-2 7 -9 10 -15 8 c-5 -2 -7 -6 -5 -10 c2 -3 6 -4 9 -2 c-6 1 -8 5 -6 9" stroke-width="2.4" fill="none" stroke-linecap="round"/><circle cx="24" cy="'+(bTop+gap)+'" r="3.2" stroke="none"/><circle cx="34" cy="'+(bTop+2*gap-2)+'" r="2.4" stroke="none"/><circle cx="34" cy="'+(bTop+3*gap+2)+'" r="2.4" stroke="none"/></g>';
+  const F=bTop+gap;   // F-linjen i f-nøkkelen
+  s+='<g fill="#111827" stroke="#111827">'
+  + '<circle cx="27" cy="'+F+'" r="3.4" stroke="none"/>'
+  + '<path d="M27 '+F+' C 40 '+(F-11)+', 45 '+(F-1)+', 41 '+(F+9)+' C 37 '+(F+19)+', 27 '+(F+21)+', 20 '+(F+15)+' C 15 '+(F+10)+', 17 '+(F+3)+', 24 '+(F+2)+'" fill="none" stroke-width="3" stroke-linecap="round"/>'
+  + '<circle cx="47" cy="'+(F-4.5)+'" r="2.2" stroke="none"/>'
+  + '<circle cx="47" cy="'+(F+4.5)+'" r="2.2" stroke="none"/>'
+  + '</g>';
   const notes=state.entered.map(e=>e.note);
   if(!notes.length){
     s+='<text x="'+(W/2)+'" y="'+((tBottom+bTop)/2)+'" text-anchor="middle" font-size="13" fill="#9ca3af" font-family="sans-serif">notene du skriver inn vises her – g-nøkkel over, f-nøkkel under…</text>';
