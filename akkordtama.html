@@ -601,11 +601,8 @@ function onCorrect(){
   game.xp += 10 + (firstTry ? 5 : 0) + Math.min(game.streak, 5) * 2;
   let leveled = false;
   while(game.level < LEGENDARY_LEVEL && game.xp >= xpNeeded(game.level)){ game.xp -= xpNeeded(game.level); game.level++; leveled = true; }
-  if(leveled){
-    jingleLevel();
-    toast(game.level >= LEGENDARY_LEVEL ? '👑👑 LEGENDARY! Tamagotchien er nå PER OTTAR! 👑👑' : '🎉 Level ' + game.level + '!');
-  }
-  // lås opp gjenstander
+  // lås opp gjenstander (returnerer nye id-er)
+  const newItems = [];
   Object.entries(ITEMS).forEach(function(pair){
     const id = pair[0], it = pair[1];
     if(game.items.includes(id)) return;
@@ -613,11 +610,26 @@ function onCorrect(){
     if(ok){
       game.items.push(id);
       game.equipped[it.slot] = id;
-      jingleItem();
-      toast('🎁 Du vant ' + it.emo + ' ' + it.name + '!');
+      newItems.push(id);
     }
   });
-  jingleCorrect(key);
+  // 🔊 Rekkefølge: akkorden først, tamagotchi-temaet rett etterpå
+  playChordKey(key, 1.2, false);                                        // 1) akkorden
+  setTimeout(function(){ playTones([72,76,79,84], 1.0, true); }, 1400);  // 2) "tema"-arpeggio
+  let d = 2500;
+  if(leveled){
+    setTimeout(function(){
+      jingleLevel();
+      toast(game.level >= LEGENDARY_LEVEL ? '👑👑 LEGENDARY! Tamagotchien er nå PER OTTAR! 👑👑' : '🎉 Level ' + game.level + '!');
+    }, d);
+    d += 900;
+  }
+  if(newItems.length){
+    setTimeout(function(){
+      jingleItem();
+      newItems.forEach(function(id){ toast('🎁 Du vant ' + ITEMS[id].emo + ' ' + ITEMS[id].name + '!'); });
+    }, d);
+  }
   feedAnim();
   save();
 }
