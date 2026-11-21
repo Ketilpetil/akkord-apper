@@ -512,12 +512,24 @@ function render(){
   el.checkBtn.disabled = !state.entered.length || state.solved || state.finished;
   el.score.textContent = '⭐ På første forsøk: ' + state.firstTry + ' / ' + state.total;
 }
+function spellFor(note){
+  // Enharmonisk stavemåte: A# -> Bb hvis akkorden inneholder Bb (C7 = C E G Bb)
+  try{
+    const ch = CHORDS[currentKey()];
+    if(ch){
+      const pc = ((note.midi%12)+12)%12;
+      const t = ch.tones.find(function(x){ return pcOf(x) === pc; });
+      if(t){ const tn = parseNote(t, note.oct); if(tn) return tn.label; }
+    }
+  }catch(e){}
+  return note.label;
+}
 function renderChips(){
   el.chips.innerHTML = '';
   state.entered.forEach(function(e, i){
     const chip = document.createElement('span'); chip.className = 'chip';
     const play = document.createElement('button'); play.type = 'button'; play.className = 'play';
-    play.textContent = e.note.label + ' 🔊'; play.title = 'Hør denne tonen';
+    play.textContent = spellFor(e.note) + ' 🔊'; play.title = 'Hør denne tonen';
     play.addEventListener('click', function(){ playTones([e.note.midi], 0.8, false); });
     const rm = document.createElement('button'); rm.type = 'button'; rm.className = 'rm'; rm.textContent = '×'; rm.title = 'Fjern';
     rm.addEventListener('click', function(){ state.entered.splice(i, 1); render(); });
@@ -569,7 +581,7 @@ function renderStaff(){
     s+='<ellipse cx="'+cx+'" cy="'+cy+'" rx="6.2" ry="4.4" fill="'+color+'" transform="rotate(-18 '+cx+' '+cy+')"/>';
     if(stemUp) s+='<line x1="'+(cx+5.5)+'" y1="'+(cy-1)+'" x2="'+(cx+5.5)+'" y2="'+(cy-32)+'" stroke="'+color+'" stroke-width="1.5"/>';
     else s+='<line x1="'+(cx-5.5)+'" y1="'+(cy+1)+'" x2="'+(cx-5.5)+'" y2="'+(cy+32)+'" stroke="'+color+'" stroke-width="1.5"/>';
-    s+='<text x="'+cx+'" y="'+(bottom+15)+'" text-anchor="middle" font-size="11" font-weight="700" fill="'+color+'" font-family="sans-serif">'+n.label+'</text>';
+    s+='<text x="'+cx+'" y="'+(bottom+15)+'" text-anchor="middle" font-size="11" font-weight="700" fill="'+color+'" font-family="sans-serif">'+spellFor(n)+'</text>';
     prev=steps; prevTreble=treble;
   });
   el.staffWrap.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">'+s+'</svg>';
