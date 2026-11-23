@@ -34,7 +34,7 @@ Tips: I Chrome/Edge/Safari/Firefox, sjekk at adressefeltet viser `file:///...` �
 - v2: Tamagotchi med mat-meter, XP/level, streaks, gjenstandssamling – lagres i nettleseren (localStorage), også «mens du er borte»
 - v2: **13 gjenstander i to temaer** – 🌈 rainbow unicorn (enhjørning-horn, regnbue-manke, stjernestøv) og 🤘 black metal (corpsepaint, piggkrage, kjede, pentagram) – låses opp ved streaks/level, og du kan **ha på så mange du vil samtidig** (klikk for å ta av/på)
 - v2: Notnavnene vises under notelinjen, rett under hver note
-- v2: Ved **level 10** blir tamagotchien **👑 LEGENDARY PER OTTAR 👑** (bilde i gullramme, `assets/per-ottar.jpg`)
+- v2: Ved **level 10** blir tamagotchien **👑 LEGENDARY PER OTTAR 👑** (bilde i gullramme, innebygd som base64 i HTML-filen – vises alltid, også uten `assets/`-mappen; `assets/per-ottar.jpg` ligger fortsatt i repoet)
 
 ## Teknologi
 
