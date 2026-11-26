@@ -376,7 +376,14 @@ function playChordKey(key, dur, arp){
   if(ch.bass) midis.unshift(parseNote(ch.bass, 3).midi);   // bass én oktav ned
   playTones(midis, dur, arp);
 }
-function jingleCorrect(key){ playChordKey(key,1.1,false); setTimeout(function(){ playTones([72,76,79,84],1.0,true); },380); }
+function rewardArp(key){
+  const ch = CHORDS[key];
+  const midis = ch.tones.map(function(t){ return parseNote(t,4).midi; }).sort(function(a,b){ return a-b; });
+  if(ch.bass) midis.unshift(parseNote(ch.bass,3).midi);   // slasj-akkord: basstonen nederst
+  midis.push(parseNote(ch.tones[0],5).midi);               // grunntone én oktav opp
+  return midis;
+}
+function jingleCorrect(key){ playChordKey(key,1.1,false); setTimeout(function(){ playTones(rewardArp(key),1.0,true); },380); }
 function jingleWrong(){ playTones([64],.22,false); setTimeout(function(){ playTones([57],.5,false); },180); }
 function jingleLevel(){ playTones([60,64,67,72,76,79,84],1.4,true); }
 function jingleItem(){ playTones([67,72,79],.9,true); }
@@ -740,7 +747,7 @@ function onCorrect(){
   });
   // 🔊 Rekkefølge: akkorden først, tamagotchi-temaet rett etterpå
   playChordKey(key, 1.2, false);                                        // 1) akkorden
-  setTimeout(function(){ playTones([72,76,79,84], 1.0, true); }, 1400);  // 2) "tema"-arpeggio
+  setTimeout(function(){ playTones(rewardArp(key), 1.0, true); }, 1400);  // 2) belønning: arpeggio opp av SAMME akkord
   let d = 2500;
   if(leveled){
     setTimeout(function(){
