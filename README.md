@@ -36,6 +36,16 @@ Tips: I Chrome/Edge/Safari/Firefox, sjekk at adressefeltet viser `file:///...` �
 - v2: Notnavnene vises under notelinjen, rett under hver note
 - v2: Ved **level 10** blir tamagotchien **👑 LEGENDARY PER OTTAR 👑** (bilde i gullramme, innebygd som base64 i HTML-filen – vises alltid, også uten `assets/`-mappen; `assets/per-ottar.jpg` ligger fortsatt i repoet)
 
+
+## Akkordtama 2.0 (`akkordtama2.html`)
+- **Enharmonisk stavemåte**: A♯ skrives som B♭ når akkorden inneholder B♭ (f.eks. C7 = C – E – G – **B♭**) – både i notene og i fortegnet
+- **Større g-nøkkel** som ligger riktig rundt G-linjen
+- Spillet fortsetter etter level 10, **opp til level 20** (MAX 👑)
+- Ved level 10 blir tamagotchien **👑 LEGENDARY PER OTTAR 👑** – og **kan ha på seg gjenstander** (emoji over bildet)
+- **10 nye gjenstander** for level 11–20 i sjanger-temaer: pop (🎤), rock (🎸 🥁), jazz (🎺), klassisk (🎻), disco (🪩) + humor (🤡 📯 🪗) og 🏆 ved level 20
+- Fra level 10 låses **avanserte akkorder** opp: 4- og 5-klanger (maj7, m7, 6, m7♭5, dim7, 9, maj9, add9), dim/aug/sus2/sus4 og avanserte slasj-akkorder – egne akkordrekker i nedtrekksmenyen (låst til level 10), og «Tilfeldig rekke» inkluderer dem først ved level 10+
+- Egen lagring (`akkordtama2`), så 2.0 kolliderer ikke med vanlig akkordtama
+
 ## Teknologi
 
 Vanilla HTML/CSS/JavaScript – ingen byggesteg, ingen eksterne avhengigheter.
