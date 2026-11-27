@@ -277,7 +277,9 @@ function parseNote(tok, defOct){
 function pcOf(tok){ const n = parseNote(tok,4); return n ? ((n.midi%12)+12)%12 : null; }
 function chordIsCorrect(key, notes){
   const ch = CHORDS[key];
-  const want = ch.tones.map(t=>pcOf(t)).sort((a,b)=>a-b).join(',');
+  const wantPCs = ch.tones.map(t=>pcOf(t));
+  if(ch.bass) wantPCs.push(pcOf(ch.bass));   // slasj-akkord: basstonen kan (og må) være med nederst
+  const want = wantPCs.sort((a,b)=>a-b).join(',');
   const got = [...new Set(notes.map(n=>((n.midi%12)+12)%12))].sort((a,b)=>a-b).join(',');
   if(want!==got) return false;
   if(ch.bass){                                   // slasj-akkord: basstonen må ligge nederst
@@ -715,6 +717,7 @@ function check(){
   game.attempts++;
   const key = currentKey();
   const want = CHORDS[key].tones.map(t=>pcOf(t));
+  if(CHORDS[key].bass) want.push(pcOf(CHORDS[key].bass));
   const gotSet = [...new Set(game.entered.map(e=>((e.note.midi%12)+12)%12))];
   const hits = gotSet.filter(p=>want.includes(p)).length;
   if(chordIsCorrect(key, game.entered.map(e=>e.note)) && gotSet.length === want.length){

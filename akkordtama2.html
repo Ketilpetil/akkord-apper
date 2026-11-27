@@ -335,7 +335,9 @@ function parseNote(tok, defOct){
 function pcOf(tok){ const n = parseNote(tok,4); return n ? ((n.midi%12)+12)%12 : null; }
 function chordIsCorrect(key, notes){
   const ch = CHORDS[key];
-  const want = ch.tones.map(t=>pcOf(t)).sort((a,b)=>a-b).join(',');
+  const wantPCs = ch.tones.map(t=>pcOf(t));
+  if(ch.bass) wantPCs.push(pcOf(ch.bass));   // slasj-akkord: basstonen kan (og må) være med nederst
+  const want = wantPCs.sort((a,b)=>a-b).join(',');
   const got = [...new Set(notes.map(n=>((n.midi%12)+12)%12))].sort((a,b)=>a-b).join(',');
   if(want!==got) return false;
   if(ch.bass){                                   // slasj-akkord: basstonen må ligge nederst
@@ -407,14 +409,21 @@ const DEF = {
 const game = Object.assign({}, DEF);
 function xpNeeded(level){ return 30 + (level-1)*20; }
 
+function accCount(k){   // antall fortegn i akkorden (inkl. bass)
+  const ch = CHORDS[k];
+  return ch.tones.filter(function(t){ return t.indexOf('#') >= 0 || t.indexOf('b') >= 0; }).length
+    + (ch.bass && (ch.bass.indexOf('#') >= 0 || ch.bass.indexOf('b') >= 0) ? 1 : 0);
+}
+function poolTier(){ const l = game.level; return l < 5 ? 0 : (l < LEGENDARY_LEVEL ? 1 : (l < 17 ? 2 : 3)); }
 function activeList(){
-  const tier = game.level < LEGENDARY_LEVEL ? 0 : (game.level < 17 ? 1 : 2);
+  const tier = poolTier();
   if(game.randomTier !== tier){ game.randomList = null; game.randomTier = tier; }
   if(!game.randomList){
     const keys = Object.keys(CHORDS).filter(function(k){
-      if(tier === 0) return !ADVANCED.has(k);                 // kun enkle akkorder
-      if(tier === 1) return !POOL5.has(k);                     // + 4-klanger, dim/sus, slasj
-      return true;                                             // + 5-klanger (9-akkorder) fra level 17
+      if(tier === 0) return !ADVANCED.has(k) && accCount(k) === 0 && !CHORDS[k].bass;   // helt enkle, ingen fortegn, ingen slasj: C F G Am Dm Em Am7 Dm7 Em7
+      if(tier === 1) return !ADVANCED.has(k) && accCount(k) <= 1;    // + ett fortegn: D A E B Bb Gm C7 G7 …
+      if(tier === 2) return !POOL5.has(k);                           // + avanserte 4-klanger, dim/sus, slasj
+      return true;                                                   // + 5-klanger (9-akkorder) fra level 17
     });
     game.randomList = keys.sort(function(){ return Math.random()-0.5; }).slice(0,8);
   }
@@ -826,6 +835,7 @@ function check(){
   game.attempts++;
   const key = currentKey();
   const want = CHORDS[key].tones.map(t=>pcOf(t));
+  if(CHORDS[key].bass) want.push(pcOf(CHORDS[key].bass));
   const gotSet = [...new Set(game.entered.map(e=>((e.note.midi%12)+12)%12))];
   const hits = gotSet.filter(p=>want.includes(p)).length;
   if(chordIsCorrect(key, game.entered.map(e=>e.note)) && gotSet.length === want.length){
