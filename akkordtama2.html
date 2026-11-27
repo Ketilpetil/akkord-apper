@@ -12,23 +12,27 @@
   }
   *{box-sizing:border-box}
   body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
-  header{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;padding:20px 24px}
-  header h1{margin:0;font-size:1.5rem}
-  header p{margin:6px 0 0;opacity:.92;font-size:.95rem}
-  main{max-width:1060px;margin:0 auto;padding:18px 16px 60px}
+  header{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;padding:8px 24px}
+  header h1{margin:0;font-size:1.3rem}
+  header p{margin:4px 0 0;opacity:.92;font-size:.88rem}
+  main{max-width:1480px;margin:0 auto;padding:8px 16px 12px}
   #errbanner{display:none;background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-weight:600}
 
-  .topbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+  .topbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px}
   .topbar label{font-size:.9rem;color:var(--muted);font-weight:600}
   select,input[type=text]{font:inherit;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}
 
-  .game{display:grid;grid-template-columns:300px 1fr;gap:16px;align-items:start}
-  @media(max-width:840px){.game{grid-template-columns:1fr}}
+  .game{display:grid;grid-template-columns:290px minmax(0,1fr) 250px;gap:14px;align-items:start}
+  @media(max-width:1150px){.game{grid-template-columns:1fr}}
+  .coll #collection{grid-template-columns:repeat(4,1fr);gap:4px}
+  .coll .item{font-size:.58rem;padding:3px 1px}
+  .coll .item .emo{font-size:1.05rem}
+  .coll .hint{font-size:.72rem}
 
   /* --- Tamagotchi-panel --- */
-  .pet-panel{background:var(--card);border-radius:18px;padding:16px;box-shadow:0 6px 24px rgba(30,27,75,.08)}
+  .pet-panel{background:var(--card);border-radius:18px;padding:12px;box-shadow:0 6px 24px rgba(30,27,75,.08)}
   #petWrap{position:relative}
-  #petWrap svg{width:190px;height:auto;display:block;margin:0 auto}
+  #petWrap svg{width:168px;height:auto;display:block;margin:0 auto}
   #petWrap.feed svg{animation:bounce .55s ease}
   @keyframes bounce{0%{transform:translateY(0) scale(1)}30%{transform:translateY(-16px) scale(1.05)}60%{transform:translateY(0) scale(.96)}100%{transform:translateY(0) scale(1)}}
   #nom{position:absolute;top:6px;left:50%;transform:translateX(-50%);font-weight:800;color:var(--good);opacity:0;pointer-events:none;font-size:1.2rem}
@@ -36,49 +40,49 @@
   .legendary{border:4px solid #fbbf24;border-radius:16px;padding:8px;background:radial-gradient(circle at 50% 15%,#fef3c7,#fde68a);box-shadow:0 0 24px rgba(251,191,36,.8);text-align:center;animation:legendGlow 1.6s ease-in-out infinite;max-width:200px;margin:0 auto}
   @keyframes legendGlow{0%,100%{box-shadow:0 0 14px rgba(251,191,36,.55)}50%{box-shadow:0 0 36px rgba(251,191,36,1)}}
   .legendary img{width:168px;height:168px;object-fit:cover;border-radius:12px;display:block;margin:0 auto;border:2px solid #fff}
-  .legendary .tag{font-weight:800;color:#92400e;font-size:.78rem;margin-top:6px;letter-spacing:.3px;white-space:nowrap}
+  .legendary .tag{font-weight:800;color:#92400e;font-size:.78rem;margin-top:6px;letter-spacing:.3px;}
   .legendary{position:relative}
   .lg-imgwrap{position:relative}
   .lg-item{position:absolute;line-height:1;filter:drop-shadow(0 2px 2px rgba(0,0,0,.4));pointer-events:none;z-index:2}
   @keyframes nompop{0%{opacity:0;transform:translate(-50%,10px) scale(.6)}20%{opacity:1;transform:translate(-50%,0) scale(1.15)}70%{opacity:1}100%{opacity:0;transform:translate(-50%,-14px) scale(1)}}
   #petName{width:100%;text-align:center;font-weight:800;font-size:1.05rem;border:none;background:transparent;color:var(--accent2);margin-bottom:6px}
   #petName:focus{outline:2px solid var(--line);border-radius:8px;background:#fff}
-  .stat{display:flex;align-items:center;gap:8px;margin:7px 0;font-size:.88rem}
-  .stat .bar{flex:1;height:14px;background:#e5e7eb;border-radius:999px;overflow:hidden}
+  .stat{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:.85rem}
+  .stat .bar{flex:1;height:12px;background:#e5e7eb;border-radius:999px;overflow:hidden}
   .fill{height:100%;transition:width .4s, background .4s}
   #hungerFill{width:80%;background:linear-gradient(90deg,#4ade80,#16a34a)}
   #hungerFill.low{background:linear-gradient(90deg,#f87171,#dc2626)}
   #xpFill{width:0%;background:linear-gradient(90deg,#a78bfa,#7c3aed)}
   .stat.small{font-size:.82rem;color:var(--muted)}
-  .pet-panel h3{margin:12px 0 6px;font-size:.95rem}
-  #collection{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-  .item{border:1px solid var(--line);border-radius:10px;background:#fff;padding:7px 4px;text-align:center;cursor:pointer;font-size:.72rem;color:var(--ink)}
-  .item .emo{font-size:1.45rem;display:block}
+  .pet-panel h3{margin:8px 0 5px;font-size:.9rem}
+  #collection{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+  .item{border:1px solid var(--line);border-radius:9px;background:#fff;padding:4px 2px;text-align:center;cursor:pointer;font-size:.62rem;color:var(--ink)}
+  .item .emo{font-size:1.15rem;display:block}
   .item.locked{opacity:.45;cursor:not-allowed}
   .item.equipped{box-shadow:0 0 0 3px var(--accent)}
-  .hint{font-size:.78rem;color:var(--muted);line-height:1.45;margin-top:10px}
+  .hint{font-size:.76rem;color:var(--muted);line-height:1.4;margin-top:8px}
 
   /* --- Akkord-kort (som v1) --- */
-  .card{background:var(--card);border-radius:18px;padding:22px;box-shadow:0 6px 24px rgba(30,27,75,.08);border:2px solid transparent;transition:background .35s,border-color .35s}
+  .card{background:var(--card);border-radius:18px;padding:14px 18px;box-shadow:0 6px 24px rgba(30,27,75,.08);border:2px solid transparent;transition:background .35s,border-color .35s}
   .card.correct{background:var(--good-bg);border-color:var(--good)}
   .card.wrong{animation:shake .4s}
   @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
   .chord-row{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
-  .chord-name{font-size:2.6rem;font-weight:800;color:var(--accent);line-height:1;transition:color .35s}
+  .chord-name{font-size:1.8rem;font-weight:800;color:var(--accent);line-height:1;transition:color .35s}
   .card.correct .chord-name{color:var(--good)}
   .chord-hint{color:var(--muted)}
   .chord-answer{font-weight:700;color:var(--good);min-height:1.4em}
-  #staffWrap{max-width:420px;margin:10px auto 4px;background:#fffdf5;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  #staffWrap{max-width:470px;margin:6px auto 2px;background:#fffdf5;border:1px solid var(--line);border-radius:12px;overflow:hidden}
   #staffWrap svg{display:block;width:100%;height:auto}
-  #chips{display:flex;flex-wrap:wrap;gap:8px;min-height:38px;margin:8px 0 4px}
+  #chips{display:flex;flex-wrap:wrap;gap:8px;min-height:34px;margin:6px 0 2px}
   .chip{display:inline-flex;align-items:center;gap:6px;background:#eef2ff;color:#3730a3;border-radius:999px;padding:5px 6px 5px 12px;font-weight:700;border:1px solid #c7d2fe}
   .card.correct .chip{background:#dcfce7;color:#166534;border-color:#86efac}
   .chip .play{border:none;background:transparent;cursor:pointer;font-size:.85rem;padding:2px 4px}
   .chip .rm{border:none;background:rgba(0,0,0,.08);border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:.8rem;line-height:1;padding:0}
-  #feedback{min-height:1.6em;font-weight:600;margin:6px 0 10px}
+  #feedback{min-height:1.5em;font-weight:600;margin:4px 0 8px}
   #feedback.good{color:var(--good)} #feedback.bad{color:var(--bad)} #feedback.warn{color:#b45309}
-  .actions{display:flex;flex-wrap:wrap;gap:10px}
-  button{cursor:pointer;font:inherit;font-weight:700;border-radius:12px;border:none;padding:11px 18px;transition:transform .08s,filter .15s}
+  .actions{display:flex;flex-wrap:wrap;gap:8px}
+  button{cursor:pointer;font:inherit;font-weight:700;border-radius:11px;border:none;padding:8px 13px;transition:transform .08s,filter .15s}
   button:hover{filter:brightness(1.06)} button:active{transform:scale(.97)}
   button:disabled{opacity:.45;cursor:not-allowed}
   .btn-primary{background:var(--accent);color:#fff}
@@ -87,7 +91,7 @@
   .btn-next{background:var(--good);color:#fff;display:none}
   .card.correct .btn-next{display:inline-block}
 
-  .inline-input{margin-top:12px;border-top:1px dashed var(--line);padding-top:12px}
+  .inline-input{margin-top:8px;border-top:1px dashed var(--line);padding-top:8px}
   .card .piano{max-width:100%}
   .pad{margin-top:16px;background:var(--card);border-radius:18px;padding:18px;box-shadow:0 6px 24px rgba(30,27,75,.08)}
   .pad h2{margin:0 0 10px;font-size:1.05rem}
@@ -95,12 +99,12 @@
   .seg button{border-radius:0;padding:9px 14px;background:#fff;border:none;border-right:1px solid var(--line)}
   .seg button:last-child{border-right:none}
   .seg button.active{background:var(--accent);color:#fff}
-  .piano{position:relative;display:flex;height:120px;margin:12px 0 4px;user-select:none;max-width:560px}
+  .piano{position:relative;display:flex;height:92px;margin:6px 0 3px;user-select:none;max-width:100%}
   .pkey{flex:1;background:#fff;border:1px solid #d1d5db;border-radius:0 0 8px 8px;display:flex;align-items:flex-end;justify-content:center;padding:0 0 8px;cursor:pointer;color:#374151}
   .pkey:hover{background:#eef2ff}
-  .pkey .nm{font-size:1.15rem;font-weight:800}
+  .pkey .nm{font-size:1rem;font-weight:800}
   .pkey .nm small{font-size:.62rem;color:#9ca3af;margin-left:2px;font-weight:600}
-  .bkey{position:absolute;top:0;width:4.6%;height:60%;background:#111827;color:#fff;border:none;border-radius:0 0 6px 6px;display:flex;align-items:flex-end;justify-content:center;padding:0 0 6px;font-size:.5rem;font-weight:700;line-height:1.2;text-align:center;cursor:pointer;z-index:2}
+  .bkey{position:absolute;top:0;width:3.1%;height:60%;background:#111827;color:#fff;border:none;border-radius:0 0 6px 6px;display:flex;align-items:flex-end;justify-content:center;padding:0 0 6px;font-size:.58rem;font-weight:700;line-height:1.2;text-align:center;cursor:pointer;z-index:2}
   .bkey:hover{background:var(--accent)}
   .textrow{display:flex;gap:8px;flex-wrap:wrap}
   .textrow input{flex:1;min-width:180px}
@@ -131,8 +135,8 @@
 <main>
   <div id="errbanner"></div>
   <div class="topbar">
-    <label for="prog">Akkordrekke:</label>
-    <select id="prog"></select>
+    <span style="display:none"><label for="prog">Akkordrekke:</label><select id="prog"></select></span>
+    <span style="font-size:.85rem;color:var(--muted);font-weight:600">🎲 Tilfeldige akkorder – blir vanskeligere etter hvert som du levler! (5-klanger fra level 17)</span>
     <button id="playAll" class="btn-ghost" type="button">▶ Spill hele rekken</button>
     <button id="resetAll" class="btn-ghost" type="button" title="Slett lagret spill">🗑 Nullstill alt</button>
   </div>
@@ -144,9 +148,6 @@
       <div class="stat"><span>🍖</span><div class="bar"><div class="fill" id="hungerFill"></div></div><span id="hungerVal"></span></div>
       <div class="stat"><span>⭐</span><div class="bar"><div class="fill" id="xpFill"></div></div><span id="xpVal"></span></div>
       <div class="stat small">Level <b id="levelVal"></b> · 🔥 streak <b id="streakVal"></b> (beste <b id="bestVal"></b>) · ✅ <b id="okVal"></b> · ❌ <b id="badVal"></b></div>
-      <h3>🎒 Samling <span style="font-weight:400;color:var(--muted);font-size:.75rem">(klikk for å ta på)</span></h3>
-      <div id="collection"></div>
-      <p class="hint">Tamagotchien blir sulten med tiden (og av feilsvar!). Riktig svar = 🍔 mat + XP. Ved streaks og level vinner du gjenstander – klikk for å ta på/av så mange du vil! Sulter den ihjel, dør den… 💀</p>
     </aside>
 
     <section class="card" id="card">
@@ -161,8 +162,8 @@
         <h2 style="margin:0 0 8px;font-size:1rem">Skriv inn toner 👇</h2>
 
     <div>
-      <span class="seg" id="octSeg"><button type="button" data-oct="3">3</button><button type="button" data-oct="4" class="active">4</button><button type="button" data-oct="5">5</button></span>
-      <span style="font-size:.85rem;color:var(--muted)">velg oktav, klikk på pianoet:</span>
+      <span class="seg" id="octSeg" style="display:none"><button type="button" data-oct="3">3</button><button type="button" data-oct="4" class="active">4</button><button type="button" data-oct="5">5</button></span>
+      <span style="font-size:.85rem;color:var(--muted)">klikk på pianoet (3 oktaver C4–B6) – oktav 4 brukes når du skriver:</span>
     </div>
     <div class="piano" id="piano"></div>
     <div class="textrow">
@@ -181,6 +182,12 @@
         <button id="nextBtn" class="btn-next" type="button">Neste akkord →</button>
       </div>
     </section>
+
+    <aside class="pet-panel coll">
+      <h3>🎒 Samling <span style="font-weight:400;color:var(--muted);font-size:.75rem">(klikk for å ta på)</span></h3>
+      <div id="collection"></div>
+      <p class="hint">Tamagotchien blir sulten med tiden (og av feilsvar!). Riktig svar = 🍔 mat + XP. Ved streaks og level vinner du gjenstander – klikk for å ta på/av så mange du vil! Sulter den ihjel, dør den… 💀</p>
+    </aside>
   </div>
 
 
@@ -273,6 +280,7 @@ const ADVANCED_PROGRESSIONS = {
   '🔓 Avanserte slasj-akkorder':      ['Cmaj7/G','Dm7/F','Fmaj7/C','Em7/D','Am/G','G/B']
 };
 const RANDOM_KEY = '🎲 Tilfeldig rekke';
+const POOL5 = new Set(['C9','Cmaj9','Cm9','G9','D9','Am9']);   // 5-klanger kommer nær level 20
 
 /* ================= Gjenstander ================= */
 const ITEMS = {
@@ -391,7 +399,7 @@ function jingleDeath(){ playTones([55],.5,false); setTimeout(function(){ playTon
 
 const SAVE_KEY = 'akkordtama2';
 const DEF = {
-  name:'Bob', hunger:80, xp:0, level:1, streak:0, bestStreak:0,
+  name:'Bob Peggy', hunger:80, xp:0, level:1, streak:0, bestStreak:0, randomTier:0,
   items:[], wearing:[], alive:true, totalCorrect:0, totalWrong:0,
   lastSeen:Date.now(), prog:Object.keys(PROGRESSIONS)[0], idx:0,
   entered:[], attempts:0, solved:false, oct:4, accMode:0, randomList:null, finished:false
@@ -400,14 +408,17 @@ const game = Object.assign({}, DEF);
 function xpNeeded(level){ return 30 + (level-1)*20; }
 
 function activeList(){
-  if(game.prog===RANDOM_KEY){
-    const pool = Object.keys(CHORDS).filter(function(k){ return game.level >= LEGENDARY_LEVEL || !ADVANCED.has(k); });
-    if(!game.randomList || game.randomList.some(function(k){ return ADVANCED.has(k); }) && game.level < LEGENDARY_LEVEL) game.randomList = pool.sort(()=>Math.random()-0.5).slice(0,8);
-    if(!game.randomList) game.randomList = pool.sort(()=>Math.random()-0.5).slice(0,8);
-    return game.randomList;
+  const tier = game.level < LEGENDARY_LEVEL ? 0 : (game.level < 17 ? 1 : 2);
+  if(game.randomTier !== tier){ game.randomList = null; game.randomTier = tier; }
+  if(!game.randomList){
+    const keys = Object.keys(CHORDS).filter(function(k){
+      if(tier === 0) return !ADVANCED.has(k);                 // kun enkle akkorder
+      if(tier === 1) return !POOL5.has(k);                     // + 4-klanger, dim/sus, slasj
+      return true;                                             // + 5-klanger (9-akkorder) fra level 17
+    });
+    game.randomList = keys.sort(function(){ return Math.random()-0.5; }).slice(0,8);
   }
-  if(ADVANCED_PROGRESSIONS[game.prog] && game.level < LEGENDARY_LEVEL) return PROGRESSIONS[Object.keys(PROGRESSIONS)[0]];
-  return PROGRESSIONS[game.prog] || ADVANCED_PROGRESSIONS[game.prog];
+  return game.randomList;
 }
 function currentKey(){ return activeList()[game.idx]; }
 
@@ -446,7 +457,7 @@ const BLACK_KEYS = [
 ];
 function buildPiano(){
   el.piano.innerHTML = '';
-  const octs = [game.oct, game.oct+1];          // to oktavr på pianoet
+  const octs = [4,5,6];                            // tre faste oktaver C4–B6 (oktav kan ikke endres)
   octs.forEach(function(oct){
     WHITE_KEYS.forEach(function(L){
       const k = document.createElement('button');
@@ -462,7 +473,7 @@ function buildPiano(){
       const after = oi*7 + bk.after;
       const b = document.createElement('button');
       b.type='button'; b.className='bkey';
-      b.style.left = 'calc(' + ((after+1)/14*100) + '% - 2.3%)';
+      b.style.left = 'calc(' + ((after+1)/21*100) + '% - 1.55%)';
       b.innerHTML = bk.sharp.replace('#','♯') + '/<br>' + bk.flat.replace('b','♭');
       b.title = bk.sharp + oct + ' = ' + bk.flat + oct + ' — shift+klikk gir ' + bk.flat;
       b.addEventListener('click', function(e){ addToken((e.shiftKey ? bk.flat : bk.sharp) + oct, true); });
@@ -486,7 +497,6 @@ function init(){
     progress:$('progress'), deathOverlay:$('deathOverlay'), deathStats:$('deathStats'), restartBtn:$('restartBtn')
   };
 
-  renderProgOptions();
 
   buildPiano();
   el.octSeg.addEventListener('click',function(e){
@@ -575,30 +585,39 @@ const ACC_SVG = {
   trophy: '<path d="M82 118 h36 v12 a18 18 0 0 1 -36 0 z" fill="#fbbf24" stroke="#d97706" stroke-width="2.4"/><path d="M82 122 q-14 2 -8 14 q4 7 10 4 M118 122 q14 2 8 14 q-4 7 -10 4" fill="none" stroke="#d97706" stroke-width="2.6"/><rect x="96" y="146" width="8" height="10" fill="#d97706"/><rect x="84" y="156" width="32" height="9" rx="2" fill="#b45309"/>'
 };
 const LEGEND_POS = {
-  crown:'top:-14px;left:50%;transform:translateX(-50%);font-size:34px',
-  hat:'top:-18px;left:50%;transform:translateX(-50%);font-size:36px',
-  horn:'top:-12px;left:50%;transform:translateX(-50%);font-size:30px',
-  rainbow:'top:-24px;left:50%;transform:translateX(-50%);font-size:44px',
-  flower:'top:6px;right:-8px;font-size:28px',
-  glasses:'top:33%;left:50%;transform:translateX(-50%);font-size:42px',
-  paint:'top:26%;left:50%;transform:translateX(-50%);font-size:46px;opacity:.92',
-  sparkle:'top:4px;left:4px;font-size:26px',
-  bowtie:'bottom:16%;left:50%;transform:translateX(-50%);font-size:30px',
-  scarf:'bottom:10%;left:50%;transform:translateX(-50%);font-size:38px',
-  chain:'bottom:6%;left:50%;transform:translateX(-50%);font-size:38px',
-  spikes:'bottom:20%;left:50%;transform:translateX(-50%);font-size:34px',
-  pent:'bottom:4%;right:6px;font-size:28px',
-  mic:'bottom:8%;right:-6px;font-size:34px',
-  guitar:'bottom:4%;right:-10px;font-size:42px;transform:rotate(24deg)',
-  drums:'bottom:-8px;left:50%;transform:translateX(-50%);font-size:46px',
-  trumpet:'bottom:12%;left:-10px;font-size:42px;transform:rotate(-18deg)',
-  violin:'bottom:8%;left:-10px;font-size:38px',
-  disco:'top:-20px;left:50%;transform:translateX(-50%);font-size:38px',
-  clown:'top:30%;left:50%;transform:translateX(-50%);font-size:42px',
-  mega:'bottom:14%;right:-10px;font-size:40px;transform:rotate(-12deg)',
-  accordeon:'bottom:2%;left:-8px;font-size:44px',
-  trophy:'bottom:-12px;left:50%;transform:translateX(-50%);font-size:42px'
+  crown:'top:-16px;left:50%;transform:translateX(-50%);font-size:36px',
+  hat:'top:-20px;left:50%;transform:translateX(-50%);font-size:38px',
+  horn:'top:-14px;left:50%;transform:translateX(-50%);font-size:32px',
+  rainbow:'top:-28px;left:50%;transform:translateX(-50%);font-size:46px',
+  disco:'top:-22px;left:50%;transform:translateX(-50%);font-size:40px',
+  flower:'top:8%;right:-8px;font-size:30px',
+  sparkle:'top:4px;left:4px;font-size:28px',
+  glasses:'top:34%;left:50%;transform:translateX(-50%);font-size:46px',
+  paint:'top:28%;left:50%;transform:translateX(-50%);font-size:50px;opacity:.92',
+  clown:'top:32%;left:50%;transform:translateX(-50%);font-size:46px',
+  spikes:'bottom:30%;left:50%;transform:translateX(-50%);font-size:36px',
+  bowtie:'bottom:24%;left:50%;transform:translateX(-50%);font-size:32px',
+  scarf:'bottom:16%;left:50%;transform:translateX(-50%);font-size:40px',
+  chain:'bottom:10%;left:50%;transform:translateX(-50%);font-size:40px',
+  pent:'bottom:6%;right:6px;font-size:30px',
+  mic:'bottom:14%;right:-8px;font-size:36px',
+  guitar:'bottom:6%;right:-12px;font-size:44px;transform:rotate(24deg)',
+  drums:'bottom:0%;left:50%;transform:translateX(-50%);font-size:48px',
+  trumpet:'bottom:18%;left:-12px;font-size:44px;transform:rotate(-18deg)',
+  violin:'bottom:12%;left:-12px;font-size:40px',
+  mega:'bottom:20%;right:-12px;font-size:42px;transform:rotate(-12deg)',
+  accordeon:'bottom:4%;left:-10px;font-size:46px',
+  trophy:'bottom:-12px;left:50%;transform:translateX(-50%);font-size:44px'
 };
+function legendTitle(){
+  const w = ['Golden','Super','Cosmic','Rockstar','Rainbow','Metal','Unicorn','Alien','Champion'];
+  let t = '👑 Legendary Per Ottar';
+  if(game.level > LEGENDARY_LEVEL){
+    t = '👑 Legendary ' + w.slice(0, Math.min(game.level - LEGENDARY_LEVEL, w.length)).join(' ') + ' Per Ottar';
+  }
+  if(game.level >= MAX_LEVEL) t = '🌌 MAX ' + t;
+  return t;
+}
 function petSVG(){
   const h = game.hunger, dead = !game.alive;
   let body = '#8b5cf6';
@@ -645,11 +664,14 @@ function renderPet(){
     el.petSvg.innerHTML = '<div class="legendary"><div class="lg-imgwrap"><img src="' + PER_OTTAR_IMG + '" alt="LEGENDARY PER OTTAR" '
       + 'onerror="this.outerHTML=petSVG()">'
       + game.wearing.map(function(id){ return (ITEMS[id] && LEGEND_POS[id]) ? '<span class="lg-item" style="' + LEGEND_POS[id] + '">' + ITEMS[id].emo + '</span>' : ''; }).join('')
-      + '</div><div class="tag">👑 LEGENDARY PER OTTAR 👑</div></div>';
+      + '</div><div class="tag">' + legendTitle() + '</div></div>';
+    const tagEl = el.petSvg.querySelector('.tag');
+    if(tagEl && tagEl.textContent.length > 34) tagEl.style.fontSize = '.58rem';
   } else {
     el.petSvg.innerHTML = petSVG();
   }
-  el.petName.value = game.name;
+  el.petName.value = game.level >= LEGENDARY_LEVEL ? legendTitle() : game.name;
+  el.petName.readOnly = game.level >= LEGENDARY_LEVEL;
   const h = Math.round(game.hunger);
   el.hungerFill.style.width = h + '%';
   el.hungerFill.classList.toggle('low', h < 30);
@@ -753,7 +775,7 @@ function onCorrect(){
     setTimeout(function(){
       jingleLevel();
       if(game.level >= MAX_LEVEL) toast('🏆👑 MAX LEVEL ' + MAX_LEVEL + '! En ekte legende!');
-      else if(game.level === LEGENDARY_LEVEL) toast('👑👑 LEGENDARY! Nå er tamagotchien PER OTTAR! 🔓 Avanserte akkorder (dim/sus/9) låst opp!');
+      else if(game.level === LEGENDARY_LEVEL) toast('👑👑 ' + legendTitle() + '! 🔓 Avanserte akkorder (dim/sus/9) låst opp!');
       else toast('🎉 Level ' + game.level + '!');
     }, d);
     d += 900;
@@ -864,33 +886,27 @@ async function playWholeProgression(){
 
 /* ================= Rendering ================= */
 function setFeedback(msg,cls){ el.feedback.textContent=msg; el.feedback.className=cls||''; }
-function renderProgOptions(){
-  if(!el.prog) return;
-  el.prog.innerHTML = '';
-  Object.keys(PROGRESSIONS).forEach(function(k){ const o=document.createElement('option'); o.value=k; o.textContent=k; el.prog.appendChild(o); });
-  Object.keys(ADVANCED_PROGRESSIONS).forEach(function(k){
-    const o=document.createElement('option'); o.value=k;
-    if(game.level < LEGENDARY_LEVEL){ o.textContent='🔒 ' + k.replace(/^🔓 /,'') + ' (lås opp ved level 10)'; o.disabled=true; }
-    else o.textContent=k;
-    el.prog.appendChild(o);
-  });
-  const ro=document.createElement('option'); ro.value=RANDOM_KEY; ro.textContent=RANDOM_KEY + (game.level>=LEGENDARY_LEVEL?' (inkl. avanserte akkorder)':''); el.prog.appendChild(ro);
-  el.prog.value = (game.prog in PROGRESSIONS || game.prog in ADVANCED_PROGRESSIONS || game.prog===RANDOM_KEY) ? game.prog : Object.keys(PROGRESSIONS)[0];
-}
 function renderAll(){ renderPet(); render(); }
 function render(){
   renderPet(); renderStaff(); renderChips(); renderProgress();
   el.checkBtn.disabled = !game.entered.length || game.solved || !game.alive || game.finished;
-  renderProgOptions();
 }
 function spellFor(note){
-  // Enharmonisk stavemåte: A# -> Bb hvis akkorden inneholder Bb (C7 = C E G Bb)
+  // Enharmonisk stavemåte, konsistent per akkord:
+  // 1) tonen finnes i akkorden -> bruk akkordens egen stavemåte (C7: A# -> Bb)
+  // 2) ellers -> bruk b-side hvis akkorden er på b-siden (inneholder b-toner eller F/Eb/...-grunnone), ellers kryss-side
   try{
     const ch = CHORDS[currentKey()];
     if(ch){
       const pc = ((note.midi%12)+12)%12;
       const t = ch.tones.find(function(x){ return pcOf(x) === pc; });
       if(t){ const tn = parseNote(t, note.oct); if(tn) return tn.label; }
+      const flatSide = ch.tones.some(function(x){ return x.indexOf('b') >= 0; })
+        || ['F','Bb','Eb','Ab','Db','Gb'].indexOf(ch.tones[0]) >= 0;
+      const NAMES = flatSide
+        ? {1:'Db',3:'Eb',6:'Gb',8:'Ab',10:'Bb'}
+        : {1:'C#',3:'D#',6:'F#',8:'G#',10:'A#'};
+      if(NAMES[pc]){ const n2 = parseNote(NAMES[pc] + note.oct, note.oct); if(n2) return n2.label; }
     }
   }catch(e){}
   return note.label;

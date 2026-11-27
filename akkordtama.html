@@ -781,13 +781,21 @@ function render(){
   el.checkBtn.disabled = !game.entered.length || game.solved || !game.alive || game.finished;
 }
 function spellFor(note){
-  // Enharmonisk stavemåte: A# -> Bb hvis akkorden inneholder Bb (C7 = C E G Bb)
+  // Enharmonisk stavemåte, konsistent per akkord:
+  // 1) tonen finnes i akkorden -> bruk akkordens egen stavemåte (C7: A# -> Bb)
+  // 2) ellers -> bruk b-side hvis akkorden er på b-siden (inneholder b-toner eller F/Eb/...-grunnone), ellers kryss-side
   try{
     const ch = CHORDS[currentKey()];
     if(ch){
       const pc = ((note.midi%12)+12)%12;
       const t = ch.tones.find(function(x){ return pcOf(x) === pc; });
       if(t){ const tn = parseNote(t, note.oct); if(tn) return tn.label; }
+      const flatSide = ch.tones.some(function(x){ return x.indexOf('b') >= 0; })
+        || ['F','Bb','Eb','Ab','Db','Gb'].indexOf(ch.tones[0]) >= 0;
+      const NAMES = flatSide
+        ? {1:'Db',3:'Eb',6:'Gb',8:'Ab',10:'Bb'}
+        : {1:'C#',3:'D#',6:'F#',8:'G#',10:'A#'};
+      if(NAMES[pc]){ const n2 = parseNote(NAMES[pc] + note.oct, note.oct); if(n2) return n2.label; }
     }
   }catch(e){}
   return note.label;

@@ -37,6 +37,14 @@ Tips: I Chrome/Edge/Safari/Firefox, sjekk at adressefeltet viser `file:///...` �
 - v2: Ved **level 10** blir tamagotchien **👑 LEGENDARY PER OTTAR 👑** (bilde i gullramme, innebygd som base64 i HTML-filen – vises alltid, også uten `assets/`-mappen; `assets/per-ottar.jpg` ligger fortsatt i repoet)
 
 
+## Akkordtama 2.0 (`akkordtama2.html`) – oppdatert etter elevforslag
+- **Alt på én skjerm** (ingen scrolling på 1366×768 og større): bred 3-kolonns layout – tamagotchi | øvingskort | gjenstandssamling
+- **Piano med 3 faste oktaver (C4–B6)**, oktavvelger fjernet (oktav 4 ved skriving)
+- **Ingen faste akkordrekker**: alltid tilfeldige akkorder; vanskeligheten øker med level – 4-klanger/dim/sus/slasj fra level 10, **5-klanger (9-akkorder) fra level 17**
+- **Konsistent enharmonisk stavemåte**: akkordens egen stavemåte brukes alltid (C7 → B♭), og toner utenfor akkorden følger akkordens side (b-side vs kryss-side: i C7 blir G♯ til A♭, i D blir det G♯)
+- Tamagotchien heter **Bob Peggy** (kjønnsnøytralt) – ved level 10 blir den **👑 Legendary Per Ottar**, og tittelen vokser med level: Golden → Super → Cosmic → Rockstar → Rainbow → Metal → Unicorn → Alien → Champion (level 20 = 🌌 MAX …)
+- Per Ottar-bildet er større (samme skala som Bob) og gjenstandene er posisjonert på bildet (krone på hodet, corpsepaint i ansiktet osv.)
+
 ## Akkordtama 2.0 (`akkordtama2.html`)
 - **Enharmonisk stavemåte**: A♯ skrives som B♭ når akkorden inneholder B♭ (f.eks. C7 = C – E – G – **B♭**) – både i notene og i fortegnet
 - **Større g-nøkkel** som ligger riktig rundt G-linjen
