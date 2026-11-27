@@ -563,7 +563,7 @@ function renderStaff(){
   const bottom=top+4*gap;                 // g-nøkkel: nederste linje = E4
   const notes=state.entered.map(e=>e.note);
   let minSteps=0;
-  notes.forEach(function(n){ const st=n.oct*7+LETTERS.indexOf(n.letter)-30; if(st<minSteps) minSteps=st; });
+  notes.forEach(function(n){ const sp=parseNote(spellFor(n), n.oct)||n; const st=sp.oct*7+LETTERS.indexOf(sp.letter)-30; if(st<minSteps) minSteps=st; });
   const H=bottom + Math.max(44, (-minSteps)*gap/2 + 60);
   const color = state.solved ? '#16a34a' : '#111827';
   let s='';
@@ -574,7 +574,8 @@ function renderStaff(){
   }
   let prev=null;
   notes.forEach(function(n,i){
-    const steps=n.oct*7+LETTERS.indexOf(n.letter)-30;   // antall steg over E4
+    const sp0=parseNote(spellFor(n), n.oct)||n;   // enharmonisk stavemåte bestemmer også plasseringen
+    const steps=sp0.oct*7+LETTERS.indexOf(sp0.letter)-30;   // antall steg over E4
     let cx=64+i*32, cy=bottom-steps*gap/2, second=false;
     if(prev!==null && Math.abs(steps-prev)===1){ cx-=13; second=true; }
     if(steps<0){ for(let L=-2;L>=steps;L-=2){ const y=bottom-L*gap/2; s+='<line x1="'+(cx-10)+'" y1="'+y+'" x2="'+(cx+10)+'" y2="'+y+'" stroke="#111827" stroke-width="1.2"/>'; } }
