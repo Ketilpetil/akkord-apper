@@ -336,7 +336,7 @@ function pcOf(tok){ const n = parseNote(tok,4); return n ? ((n.midi%12)+12)%12 :
 function chordIsCorrect(key, notes){
   const ch = CHORDS[key];
   const wantPCs = ch.tones.map(t=>pcOf(t));
-  if(ch.bass) wantPCs.push(pcOf(ch.bass));   // slasj-akkord: basstonen kan (og må) være med nederst
+  if(ch.bass && wantPCs.indexOf(pcOf(ch.bass)) < 0) wantPCs.push(pcOf(ch.bass));   // slasj-akkord: basstonen kan (og må) være med nederst
   const want = wantPCs.sort((a,b)=>a-b).join(',');
   const got = [...new Set(notes.map(n=>((n.midi%12)+12)%12))].sort((a,b)=>a-b).join(',');
   if(want!==got) return false;
@@ -835,7 +835,7 @@ function check(){
   game.attempts++;
   const key = currentKey();
   const want = CHORDS[key].tones.map(t=>pcOf(t));
-  if(CHORDS[key].bass) want.push(pcOf(CHORDS[key].bass));
+  if(CHORDS[key].bass && want.indexOf(pcOf(CHORDS[key].bass)) < 0) want.push(pcOf(CHORDS[key].bass));
   const gotSet = [...new Set(game.entered.map(e=>((e.note.midi%12)+12)%12))];
   const hits = gotSet.filter(p=>want.includes(p)).length;
   if(chordIsCorrect(key, game.entered.map(e=>e.note)) && gotSet.length === want.length){
@@ -853,10 +853,8 @@ function check(){
   }
 }
 function next(){
-  if(game.finished){ startOver(); return; }
-  const list = activeList();
-  if(game.idx >= list.length - 1){ finish(); return; }
   game.idx++;
+  if(game.idx >= activeList().length){ game.idx = 0; game.randomList = null; }   // uendelig: ny tilfeldig rekke
   loadChord();
 }
 function loadChord(){
@@ -866,20 +864,9 @@ function loadChord(){
   el.chordName.textContent = CHORDS[key].name;
   el.chordHint.textContent = 'Besifring: ' + key + ' – hvilke ' + CHORDS[key].tones.length + ' toner hører til?' + (CHORDS[key].bass ? ' Basstonen ' + CHORDS[key].bass + ' må ligge nederst!' : '');
   el.chordAnswer.textContent = '';
-  el.nextBtn.textContent = (game.idx >= activeList().length-1) ? 'Fullfør ✔' : 'Neste akkord →';
+  el.nextBtn.textContent = 'Neste akkord →';   // går videre hele tiden
   setFeedback('', '');
   render();
-}
-function startOver(){ game.idx=0; game.randomList=null; loadChord(); }
-function finish(){
-  game.finished = true;
-  el.card.classList.remove('wrong'); el.card.classList.add('correct');
-  el.chordName.textContent = 'Ferdig! 🎉';
-  el.chordHint.textContent = 'Du fullførte hele rekken!';
-  el.chordAnswer.textContent = 'Tamagotchi-metthet: ' + Math.round(game.hunger) + '%';
-  setFeedback('Bra jobba! Tamagotchien overlevde rekken! 🐣', 'good');
-  el.nextBtn.textContent = 'Start på nytt 🔄';
-  save(); render();
 }
 async function playWholeProgression(){
   if(!game.alive) return;
