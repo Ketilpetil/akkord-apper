@@ -513,13 +513,21 @@ function render(){
   el.score.textContent = '⭐ På første forsøk: ' + state.firstTry + ' / ' + state.total;
 }
 function spellFor(note){
-  // Enharmonisk stavemåte: A# -> Bb hvis akkorden inneholder Bb (C7 = C E G Bb)
+  // Enharmonisk stavemåte, konsistent per akkord:
+  // 1) tonen finnes i akkorden -> bruk akkordens egen stavemåte (C7: A# -> Bb)
+  // 2) ellers -> bruk b-side hvis akkorden er på b-siden (inneholder b-toner eller F/Eb/...-grunnone), ellers kryss-side
   try{
     const ch = CHORDS[currentKey()];
     if(ch){
       const pc = ((note.midi%12)+12)%12;
       const t = ch.tones.find(function(x){ return pcOf(x) === pc; });
       if(t){ const tn = parseNote(t, note.oct); if(tn) return tn.label; }
+      const flatSide = ch.tones.some(function(x){ return x.indexOf('b') >= 0; })
+        || ['F','Bb','Eb','Ab','Db','Gb'].indexOf(ch.tones[0]) >= 0;
+      const NAMES = flatSide
+        ? {1:'Db',3:'Eb',6:'Gb',8:'Ab',10:'Bb'}
+        : {1:'C#',3:'D#',6:'F#',8:'G#',10:'A#'};
+      if(NAMES[pc]){ const n2 = parseNote(NAMES[pc] + note.oct, note.oct); if(n2) return n2.label; }
     }
   }catch(e){}
   return note.label;
@@ -553,7 +561,7 @@ function renderStaff(){
   const notes=state.entered.map(e=>e.note);
   let minSteps=0;
   notes.forEach(function(n){ const st=n.oct*7+LETTERS.indexOf(n.letter)-30; if(st<minSteps) minSteps=st; });
-  const H=bottom + Math.max(30, (-minSteps)*gap/2 + 46);
+  const H=bottom + Math.max(44, (-minSteps)*gap/2 + 60);
   const color = state.solved ? '#16a34a' : '#111827';
   let s='';
   for(let i=0;i<5;i++){ const y=top+i*gap; s+='<line x1="18" y1="'+y+'" x2="'+(W-10)+'" y2="'+y+'" stroke="#94a3b8" stroke-width="1.2"/>'; }
@@ -568,12 +576,15 @@ function renderStaff(){
     if(prev!==null && Math.abs(steps-prev)===1){ cx-=13; second=true; }
     if(steps<0){ for(let L=-2;L>=steps;L-=2){ const y=bottom-L*gap/2; s+='<line x1="'+(cx-10)+'" y1="'+y+'" x2="'+(cx+10)+'" y2="'+y+'" stroke="#111827" stroke-width="1.2"/>'; } }
     if(steps>8){ for(let L=10;L<=steps;L+=2){ const y=bottom-L*gap/2; s+='<line x1="'+(cx-10)+'" y1="'+y+'" x2="'+(cx+10)+'" y2="'+y+'" stroke="#111827" stroke-width="1.2"/>'; } }
-    if(n.acc!==0) s+='<text x="'+(cx-19)+'" y="'+(cy+5)+'" font-size="16" font-weight="bold" fill="'+color+'" font-family="sans-serif">'+(n.acc>0?'\u266F':'\u266D')+'</text>';
+    const sp = parseNote(spellFor(n), n.oct) || n;   // fortegn følger enharmonisk stavemåte
+    const accX = second ? (cx-32) : (cx-19);         // ikke oppå forrige notehodet
+    if(sp.acc!==0) s+='<text x="'+accX+'" y="'+(cy+5)+'" font-size="16" font-weight="bold" fill="'+color+'" font-family="sans-serif">'+(sp.acc>0?'\u266F':'\u266D')+'</text>';
     const stemUp = second ? false : steps<4;
     s+='<ellipse cx="'+cx+'" cy="'+cy+'" rx="6.2" ry="4.4" fill="'+color+'" transform="rotate(-18 '+cx+' '+cy+')"/>';
     if(stemUp) s+='<line x1="'+(cx+5.5)+'" y1="'+(cy-1)+'" x2="'+(cx+5.5)+'" y2="'+(cy-32)+'" stroke="'+color+'" stroke-width="1.5"/>';
     else s+='<line x1="'+(cx-5.5)+'" y1="'+(cy+1)+'" x2="'+(cx-5.5)+'" y2="'+(cy+32)+'" stroke="'+color+'" stroke-width="1.5"/>';
-    s+='<text x="'+cx+'" y="'+(H-8)+'" text-anchor="middle" font-size="11" font-weight="700" fill="'+color+'" font-family="sans-serif">'+spellFor(n)+'</text>';
+    const labelY = second ? (H-6) : (H-22);   // forskutte etiketter ved siden hverandre
+    s+='<text x="'+cx+'" y="'+labelY+'" text-anchor="middle" font-size="11" font-weight="700" fill="'+color+'" font-family="sans-serif">'+spellFor(n)+'</text>';
     prev=steps;
   });
   el.staffWrap.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">'+s+'</svg>';
